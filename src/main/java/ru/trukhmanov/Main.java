@@ -1,18 +1,16 @@
 package ru.trukhmanov;
 
-import ru.trukhmanov.util.DbHelper;
-
-import java.sql.*;
+import ru.trukhmanov.dao.CurrenciesDao;
+import ru.trukhmanov.entity.Currencies;
 
 public class Main{
-    public static void main(String[] args) throws SQLException{
+    public static void main(String[] args){
 
-        String sqlGetAllCurrencies = ("SELECT * FROM `currencies`");
-        PreparedStatement statement = DbHelper.getInstance().getPrepareStatement(sqlGetAllCurrencies);
+        System.out.println(CurrenciesDao.getAllCurrencies());
 
-        ResultSet result = statement.executeQuery();
-        while(result.next()){
-            System.out.println(result.getString("full_name"));
-        }
+        Currencies currencies = new Currencies(3, "EUR", "Euro", "€");
+        System.out.println(CurrenciesDao.updateCurrencies(currencies));
+
+        System.out.println(CurrenciesDao.getAllCurrencies());
     }
 }
