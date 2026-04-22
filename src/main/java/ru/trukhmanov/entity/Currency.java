@@ -5,13 +5,13 @@ import ru.trukhmanov.util.Patterns;
 /**
  * Было принято решение сделать валидацию при создании по аналогии c Jakarta Validation, а не в отдельном классе
  */
-public record Currencies(
+public record Currency(
          Integer id,
          String code,
          String fullName,
          String sign
 ){
-    public Currencies{
+    public Currency{
         if(code == null) throw new IllegalArgumentException("Code cannot be null");
         if(code.length() != 3) throw new IllegalArgumentException("Code length must be equal 3");
         if(!Patterns.ENG_LETTERS.matcher(code).matches()) throw new IllegalArgumentException("Code must consist entirely of letters");

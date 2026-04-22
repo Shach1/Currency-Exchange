@@ -1,23 +1,24 @@
 package ru.trukhmanov.dao;
 
-import ru.trukhmanov.entity.Currencies;
+import ru.trukhmanov.entity.Currency;
 import ru.trukhmanov.util.DbHelper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class CurrenciesDao{
-    public static boolean insertCurrencies(Currencies currencies){
+    public boolean insertCurrency(Currency currency){
         String sqlInsert = """
                 INSERT INTO `currencies`(code, full_name, sign)
                 VALUES(?, ?, ?)
                 """;
         try(var statement = DbHelper.getInstance().getConnection().prepareStatement(sqlInsert)){
-            statement.setString(1, currencies.code());
-            statement.setString(2, currencies.fullName());
-            statement.setString(3, currencies.sign());
+            statement.setString(1, currency.code());
+            statement.setString(2, currency.fullName());
+            statement.setString(3, currency.sign());
             return statement.executeUpdate() == 1;
         } catch (SQLException e){
             System.out.println(e.getMessage());
@@ -25,7 +26,7 @@ public class CurrenciesDao{
         }
     }
 
-    public static List<Currencies> getAllCurrencies(){
+    public List<Currency> getAllCurrencies(){
         String sqlSelect = "SELECT * from `currencies`";
 
         try(var statement = DbHelper.getInstance().getConnection().prepareStatement(sqlSelect)){
@@ -37,11 +38,25 @@ public class CurrenciesDao{
         }
     }
 
-    private static List<Currencies> mapResultSetToList(ResultSet resultSet){
-        List<Currencies> list = new ArrayList<>();
+    public Optional<Currency> findCurrencyById(Integer id){
+        String sqlFind = "SELECT * FROM `currencies` WHERE id = ?";
+        try(var statement = DbHelper.getInstance().getConnection().prepareStatement(sqlFind)){
+            statement.setInt(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            var result = mapResultSetToList(resultSet);
+            if(result.isEmpty()) return Optional.empty();
+            return Optional.of(result.getFirst());
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<Currency> mapResultSetToList(ResultSet resultSet){
+        List<Currency> list = new ArrayList<>();
         try{
             while(resultSet.next()){
-                list.add(new Currencies(
+                list.add(new Currency(
                         resultSet.getInt(1),
                         resultSet.getString(2),
                         resultSet.getString(3),
@@ -55,7 +70,7 @@ public class CurrenciesDao{
         return list;
     }
 
-    public static boolean updateCurrencies(Currencies currencies){
+    public boolean updateCurrency(Currency currency){
         String sqlUpdate = """
                  UPDATE `currencies`
                  SET\s
@@ -65,11 +80,13 @@ public class CurrenciesDao{
                  WHERE id == ?
                 \s""";
         try(var statement = DbHelper.getInstance().getConnection().prepareStatement(sqlUpdate)){
-            if(currencies.id() == null) throw new IllegalArgumentException("Id cannot be null");
-            statement.setString(1, currencies.code());
-            statement.setString(2, currencies.fullName());
-            statement.setString(3, currencies.sign());
-            statement.setInt(4, currencies.id());
+            if(currency.id() == null) throw new NullPointerException("Id cannot be null, if you want update Currency");
+            if(findCurrencyById(currency.id()).isEmpty())
+                throw new RuntimeException("Currency with id = " + currency.id() + " not found");
+            statement.setString(1, currency.code());
+            statement.setString(2, currency.fullName());
+            statement.setString(3, currency.sign());
+            statement.setInt(4, currency.id());
             return statement.executeUpdate() == 1;
         } catch (SQLException e){
             System.out.println(e.getMessage());
