@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("war")
 }
 
 group = "ru.trukhmanov"
@@ -10,6 +11,7 @@ repositories {
 }
 
 dependencies {
+    compileOnly("jakarta.platform:jakarta.jakartaee-web-api:11.0.0")
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -18,4 +20,8 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
 }
