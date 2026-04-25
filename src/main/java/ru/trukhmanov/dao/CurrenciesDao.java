@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class CurrenciesDao{
-    public boolean insertCurrency(Currency currency){
+    public boolean insert(Currency currency){
         String sqlInsert = """
                 INSERT INTO `currencies`(code, full_name, sign)
                 VALUES(?, ?, ?)
@@ -26,7 +26,7 @@ public class CurrenciesDao{
         }
     }
 
-    public List<Currency> getAllCurrencies(){
+    public List<Currency> getAll(){
         String sqlSelect = "SELECT * from `currencies`";
 
         try(var statement = DbHelper.getInstance().getConnection().prepareStatement(sqlSelect)){
@@ -38,10 +38,24 @@ public class CurrenciesDao{
         }
     }
 
-    public Optional<Currency> findCurrencyById(Integer id){
+    public Optional<Currency> findById(Integer id){
         String sqlFind = "SELECT * FROM `currencies` WHERE id = ?";
         try(var statement = DbHelper.getInstance().getConnection().prepareStatement(sqlFind)){
             statement.setInt(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            var result = mapResultSetToList(resultSet);
+            if(result.isEmpty()) return Optional.empty();
+            return Optional.of(result.getFirst());
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Optional<Currency> findByCode(String code){
+        String sqlFind = "SELECT * FROM `currencies` WHERE code = ?";
+        try(var statement = DbHelper.getInstance().getConnection().prepareStatement(sqlFind)){
+            statement.setString(1, code);
             ResultSet resultSet = statement.executeQuery();
             var result = mapResultSetToList(resultSet);
             if(result.isEmpty()) return Optional.empty();
@@ -70,7 +84,7 @@ public class CurrenciesDao{
         return list;
     }
 
-    public boolean updateCurrency(Currency currency){
+    public boolean update(Currency currency){
         String sqlUpdate = """
                  UPDATE `currencies`
                  SET\s
@@ -81,7 +95,7 @@ public class CurrenciesDao{
                 \s""";
         try(var statement = DbHelper.getInstance().getConnection().prepareStatement(sqlUpdate)){
             if(currency.id() == null) throw new NullPointerException("Id cannot be null, if you want update Currency");
-            if(findCurrencyById(currency.id()).isEmpty())
+            if(findById(currency.id()).isEmpty())
                 throw new RuntimeException("Currency with id = " + currency.id() + " not found");
             statement.setString(1, currency.code());
             statement.setString(2, currency.fullName());

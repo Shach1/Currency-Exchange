@@ -10,11 +10,14 @@ public class DbHelper{
 
     private DbHelper(){
         try{
+            Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection("jdbc:sqlite:./src/main/resources/db/CurrencyConversion.db");
             connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             connection.setAutoCommit(true);
         } catch (SQLException e){
             System.out.println(e.getMessage());
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e){
             throw new RuntimeException(e);
         }
     }

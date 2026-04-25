@@ -16,6 +16,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.xerial:sqlite-jdbc:3.49.1.0")
+    implementation("com.google.code.gson:gson:2.13.2")
 }
 
 tasks.test {
@@ -24,4 +25,8 @@ tasks.test {
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
+}
+
+tasks.war{
+    archiveFileName.set("ROOT.war")
 }

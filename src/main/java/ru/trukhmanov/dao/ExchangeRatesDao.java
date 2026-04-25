@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class ExchangeRatesDao{
-    public boolean insertExchangeRate(ExchangeRate exchangeRate){
+    public boolean insect(ExchangeRate exchangeRate){
         String sqlInsert = """
                 INSERT INTO `exchange_rates`(base_currency_id, target_currency_id, rate)
                 VALUES(?, ?, ?)
@@ -26,7 +26,7 @@ public class ExchangeRatesDao{
         }
     }
 
-    public List<ExchangeRate> getAllExchangeRates(){
+    public List<ExchangeRate> getAll(){
         String sqlSelect = "SELECT * from `exchange_rates`";
 
         try(var statement = DbHelper.getInstance().getConnection().prepareStatement(sqlSelect)){
@@ -51,7 +51,7 @@ public class ExchangeRatesDao{
         return list;
     }
 
-    public Optional<ExchangeRate> findExchangeRateById(Integer id){
+    public Optional<ExchangeRate> findById(Integer id){
         String sqlFind = "SELECT * FROM `exchange_rates` WHERE id = ?";
         try(var statement = DbHelper.getInstance().getConnection().prepareStatement(sqlFind)){
             statement.setInt(1, id);
@@ -65,7 +65,7 @@ public class ExchangeRatesDao{
         }
     }
 
-    public boolean updateExchangeRate(ExchangeRate exchangeRate){
+    public boolean update(ExchangeRate exchangeRate){
         String sqlUpdate = """
                  UPDATE `exchange_rates`
                  SET\s
@@ -78,7 +78,7 @@ public class ExchangeRatesDao{
             if(exchangeRate.id() == null)
                 throw new NullPointerException("Id cannot be null, if you want update Exchange rate");
 
-            var optionalOldRate = findExchangeRateById(exchangeRate.id());
+            var optionalOldRate = findById(exchangeRate.id());
             if(optionalOldRate.isEmpty())
                 throw new RuntimeException("Exchange rate with id = " + exchangeRate.id() + " not found");
             ExchangeRate oldRate = optionalOldRate.get();

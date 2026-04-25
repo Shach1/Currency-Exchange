@@ -1,0 +1,88 @@
+package ru.trukhmanov.servlet;
+
+import com.google.gson.Gson;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import ru.trukhmanov.CurrenciesService;
+import ru.trukhmanov.entity.Currency;
+import ru.trukhmanov.entity.ErrorMassage;
+import ru.trukhmanov.exception.RowAlreadyExist;
+
+import java.io.IOException;
+import java.util.Optional;
+
+@WebServlet(name = "CurrenciesServlet", urlPatterns = "/currencies/*")
+public class CurrenciesServlet extends HttpServlet{
+    private final CurrenciesService currenciesService = new CurrenciesService();
+    private final Gson gson = new Gson();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+        resp.setContentType("applicaton/json");
+        resp.setCharacterEncoding("UTF-8");
+
+        if(req.getPathInfo() != null) processGetSpecificCurrency(req, resp);
+        else processGetCurrencies(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+        resp.setContentType("applicaton/json");
+        resp.setCharacterEncoding("UTF-8");
+        var out = resp.getWriter();
+
+        var name = req.getParameter("name");
+        var code = req.getParameter("code");
+        var sign = req.getParameter("sign");
+
+        try{
+            var result = currenciesService.createCurrency(code, name, sign);
+            if(result.isPresent()){
+                resp.setStatus(201);
+                out.println(gson.toJson(result.get()));
+            }
+        } catch (NoSuchFieldException e){
+            resp.setStatus(400);
+            out.println(gson.toJson(new ErrorMassage(e.getMessage())));
+        } catch (RowAlreadyExist e){
+            resp.setStatus(409);
+            out.println(gson.toJson(new ErrorMassage(e.getMessage())));
+        } catch (RuntimeException e){
+            resp.setStatus(500);
+            out.println(gson.toJson(new ErrorMassage("Database is unavailable")));
+        }
+    }
+
+    private void processGetSpecificCurrency(HttpServletRequest req, HttpServletResponse resp) throws IOException{
+        var out = resp.getWriter();
+        String pathVar = req.getPathInfo().substring(1);
+        try{
+            Optional<Currency> result = currenciesService.getCurrencyBuCode(pathVar);
+            if(result.isPresent()){
+                resp.setStatus(200);
+                out.println(gson.toJson(result.get()));
+            } else{
+                resp.setStatus(404);
+                out.println(gson.toJson(new ErrorMassage("Currency not found")));
+            }
+        } catch (RuntimeException e){
+            resp.setStatus(500);
+            out.println(gson.toJson(new ErrorMassage("Database is unavailable")));
+        }
+    }
+
+    private void processGetCurrencies(HttpServletRequest req, HttpServletResponse resp) throws IOException{
+        var out = resp.getWriter();
+        try{
+            var result = currenciesService.getAllCurrencies();
+            resp.setStatus(200);
+            out.println(gson.toJson(result));
+        } catch (RuntimeException e){
+            resp.setStatus(500);
+            out.println(gson.toJson(new ErrorMassage("Database is unavailable")));
+        }
+    }
+}
