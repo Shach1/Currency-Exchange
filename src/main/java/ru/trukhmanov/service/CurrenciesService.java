@@ -28,9 +28,9 @@ public class CurrenciesService{
     }
 
     public CurrencyDto getCurrencyByCode(String code) throws CurrencyNotFound, InvalidRequestFormat{
-        if(code == null || code.isEmpty()) throw new InvalidRequestFormat();
+        if(code == null || code.length() != 3) throw new InvalidRequestFormat();
         var result = currenciesDao.findByCode(code);
-        if(result.isEmpty()) throw new CurrencyNotFound("Currency not found");
+        if(result.isEmpty()) throw new CurrencyNotFound("Currency with code: %s not found".formatted(code));
         return mapToCurrencyDto(result.get());
     }
 
@@ -43,7 +43,7 @@ public class CurrenciesService{
     public CurrencyDto createCurrency(String code, String name, String sigh) throws CurrencyAlreadyExist, MissingFormField{
         if(name == null || name.isEmpty() ||
                 code == null || code.isEmpty() ||
-                sigh == null || sigh.isEmpty()) throw new MissingFormField("A required form field is missing");
+                sigh == null || sigh.isEmpty()) throw new MissingFormField();
 
         if(currenciesDao.findByCode(code).isPresent()){
             throw new CurrencyAlreadyExist("A currency with this code already exists");

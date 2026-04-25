@@ -6,8 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.trukhmanov.exception.ExchangeRateNotFound;
-import ru.trukhmanov.exception.InvalidRequestFormat;
+import ru.trukhmanov.exception.*;
 import ru.trukhmanov.service.ExchangeRatesService;
 import ru.trukhmanov.service.dto.ErrorMassage;
 
@@ -38,15 +37,15 @@ public class ExchangeRatesServlet extends RestServlet{
         String pathVar = req.getPathInfo().substring(1);
 
         try{
-            var result = ratesService.getExchangeRateByCodePaid(pathVar);
+            var result = ratesService.getExchangeRateByCodePair(pathVar);
             resp.setStatus(200);
             out.println(gson.toJson(result));
         } catch (InvalidRequestFormat e){
             resp.setStatus(400);
-            out.println(gson.toJson(e.getMessage()));
+            out.println(gson.toJson(new ErrorMassage(e.getMessage())));
         } catch (ExchangeRateNotFound e){
             resp.setStatus(404);
-            out.println(gson.toJson(e.getMessage()));
+            out.println(gson.toJson(new ErrorMassage(e.getMessage())));
         } catch (RuntimeException e){
             resp.setStatus(500);
             out.println(gson.toJson(new ErrorMassage("Database is unavailable")));
@@ -66,8 +65,30 @@ public class ExchangeRatesServlet extends RestServlet{
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException{
         configureRestResponse(resp);
-        super.doPost(req, resp);
+        var out = resp.getWriter();
+
+        String baseCurrencyCode = req.getParameter("baseCurrencyCode");
+        String targetCurrencyCode = req.getParameter("targetCurrencyCode");
+        String rate = req.getParameter("rate");
+
+        try{
+            var result = ratesService.createExchangeRateByCodePair(baseCurrencyCode, targetCurrencyCode, rate);
+            resp.setStatus(201);
+            out.println(gson.toJson(result));
+        } catch (MissingFormField | InvalidRequestFormat e){
+            resp.setStatus(400);
+            out.println(gson.toJson(new ErrorMassage(e.getMessage())));
+        } catch (CurrencyNotFound e){
+            resp.setStatus(404);
+            out.println(gson.toJson(new ErrorMassage(e.getMessage())));
+        } catch (ExchangeRateAlreadyExist e){
+            resp.setStatus(409);
+            out.println(gson.toJson(new ErrorMassage(e.getMessage())));
+        } catch (RuntimeException e){
+            resp.setStatus(500);
+            out.println(gson.toJson(new ErrorMassage("Database is unavailable")));
+        }
     }
 }
