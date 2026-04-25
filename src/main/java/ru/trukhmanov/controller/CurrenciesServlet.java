@@ -7,6 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.trukhmanov.exception.CurrencyNotFound;
+import ru.trukhmanov.exception.InvalidRequestFormat;
 import ru.trukhmanov.exception.MissingFormField;
 import ru.trukhmanov.exception.CurrencyAlreadyExist;
 import ru.trukhmanov.service.CurrenciesService;
@@ -66,6 +67,9 @@ public class CurrenciesServlet extends RestServlet{
             var result = currenciesService.getCurrencyByCode(pathVar);
             resp.setStatus(200);
             out.println(gson.toJson(result));
+        } catch (InvalidRequestFormat e){
+            resp.setStatus(400);
+            out.println(gson.toJson(new ErrorMassage(e.getMessage())));
         } catch (CurrencyNotFound e){
             resp.setStatus(404);
             out.println(gson.toJson(new ErrorMassage(e.getMessage())));

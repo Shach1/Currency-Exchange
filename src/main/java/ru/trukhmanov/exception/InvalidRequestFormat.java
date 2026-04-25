@@ -1,6 +1,6 @@
 package ru.trukhmanov.exception;
 
-public class InvalidRequestFormat extends RuntimeException{
+public class InvalidRequestFormat extends Exception{
     public InvalidRequestFormat(String message){
         super(message);
     }

@@ -1,6 +1,7 @@
 package ru.trukhmanov.service;
 
 import ru.trukhmanov.exception.CurrencyNotFound;
+import ru.trukhmanov.exception.InvalidRequestFormat;
 import ru.trukhmanov.exception.MissingFormField;
 import ru.trukhmanov.exception.CurrencyAlreadyExist;
 import ru.trukhmanov.model.dao.CurrenciesDao;
@@ -26,8 +27,15 @@ public class CurrenciesService{
                 currency.sign());
     }
 
-    public CurrencyDto getCurrencyByCode(String code) throws CurrencyNotFound{
+    public CurrencyDto getCurrencyByCode(String code) throws CurrencyNotFound, InvalidRequestFormat{
+        if(code == null || code.isEmpty()) throw new InvalidRequestFormat();
         var result = currenciesDao.findByCode(code);
+        if(result.isEmpty()) throw new CurrencyNotFound("Currency not found");
+        return mapToCurrencyDto(result.get());
+    }
+
+    public CurrencyDto getCurrencyById(Integer id )throws CurrencyNotFound{
+        var result = currenciesDao.findById(id);
         if(result.isEmpty()) throw new CurrencyNotFound("Currency not found");
         return mapToCurrencyDto(result.get());
     }
