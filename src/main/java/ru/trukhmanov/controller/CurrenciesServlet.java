@@ -6,13 +6,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.trukhmanov.exception.RowAlreadyExist;
-import ru.trukhmanov.model.entity.Currency;
+import ru.trukhmanov.exception.CurrencyNotFound;
+import ru.trukhmanov.exception.MissingFormField;
+import ru.trukhmanov.exception.CurrencyAlreadyExist;
 import ru.trukhmanov.service.CurrenciesService;
 import ru.trukhmanov.service.dto.ErrorMassage;
 
 import java.io.IOException;
-import java.util.NoSuchElementException;
 
 @WebServlet(name = "CurrenciesServlet", urlPatterns = "/currencies/*")
 public class CurrenciesServlet extends RestServlet{
@@ -47,10 +47,10 @@ public class CurrenciesServlet extends RestServlet{
             var result = currenciesService.createCurrency(code, name, sign);
             resp.setStatus(201);
             out.println(gson.toJson(result));
-        } catch (NoSuchFieldException e){
+        } catch (MissingFormField e){
             resp.setStatus(400);
             out.println(gson.toJson(new ErrorMassage(e.getMessage())));
-        } catch (RowAlreadyExist e){
+        } catch (CurrencyAlreadyExist e){
             resp.setStatus(409);
             out.println(gson.toJson(new ErrorMassage(e.getMessage())));
         } catch (RuntimeException e){
@@ -63,10 +63,10 @@ public class CurrenciesServlet extends RestServlet{
         var out = resp.getWriter();
         String pathVar = req.getPathInfo().substring(1);
         try{
-            Currency result = currenciesService.getCurrencyByCode(pathVar);
+            var result = currenciesService.getCurrencyByCode(pathVar);
             resp.setStatus(200);
             out.println(gson.toJson(result));
-        } catch (NoSuchElementException e){
+        } catch (CurrencyNotFound e){
             resp.setStatus(404);
             out.println(gson.toJson(new ErrorMassage(e.getMessage())));
         } catch (RuntimeException e){

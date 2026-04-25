@@ -6,12 +6,12 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import ru.trukhmanov.exception.ExchangeRateNotFound;
+import ru.trukhmanov.exception.InvalidRequestFormat;
 import ru.trukhmanov.service.ExchangeRatesService;
 import ru.trukhmanov.service.dto.ErrorMassage;
 
 import java.io.IOException;
-import java.util.InvalidPropertiesFormatException;
-import java.util.NoSuchElementException;
 
 @WebServlet(name = "ExchangeRatesServlet", urlPatterns = "/exchangeRates/*")
 public class ExchangeRatesServlet extends RestServlet{
@@ -41,10 +41,10 @@ public class ExchangeRatesServlet extends RestServlet{
             var result = ratesService.getExchangeRateByCodePaid(pathVar);
             resp.setStatus(200);
             out.println(gson.toJson(result));
-        } catch (InvalidPropertiesFormatException e){
+        } catch (InvalidRequestFormat e){
             resp.setStatus(400);
             out.println(gson.toJson(e.getMessage()));
-        } catch (NoSuchElementException e){
+        } catch (ExchangeRateNotFound e){
             resp.setStatus(404);
             out.println(gson.toJson(e.getMessage()));
         } catch (RuntimeException e){
