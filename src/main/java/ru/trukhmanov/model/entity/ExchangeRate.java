@@ -1,4 +1,4 @@
-package ru.trukhmanov.entity;
+package ru.trukhmanov.model.entity;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

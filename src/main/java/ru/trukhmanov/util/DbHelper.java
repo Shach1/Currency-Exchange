@@ -5,29 +5,18 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DbHelper{
-    private static DbHelper instance = null;
-    private final Connection connection;
+    private DbHelper(){}
+    private final static String CONNECTION_URL = "jdbc:sqlite:./src/main/resources/db/CurrencyConversion.db";
 
-    private DbHelper(){
+    public static Connection getConnection() {
         try{
             Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:./src/main/resources/db/CurrencyConversion.db");
+            var connection = DriverManager.getConnection(CONNECTION_URL);
             connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             connection.setAutoCommit(true);
-        } catch (SQLException e){
-            System.out.println(e.getMessage());
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e){
+            return connection;
+        } catch (SQLException | ClassNotFoundException e){
             throw new RuntimeException(e);
         }
-    }
-
-    public static DbHelper getInstance(){
-        if(instance == null) instance = new DbHelper();
-        return instance;
-    }
-
-    public Connection getConnection(){
-        return connection;
     }
 }

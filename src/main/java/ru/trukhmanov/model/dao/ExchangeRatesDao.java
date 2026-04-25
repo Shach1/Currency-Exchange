@@ -1,6 +1,6 @@
-package ru.trukhmanov.dao;
+package ru.trukhmanov.model.dao;
 
-import ru.trukhmanov.entity.ExchangeRate;
+import ru.trukhmanov.model.entity.ExchangeRate;
 import ru.trukhmanov.util.DbHelper;
 
 import java.sql.ResultSet;
@@ -15,7 +15,7 @@ public class ExchangeRatesDao{
                 INSERT INTO `exchange_rates`(base_currency_id, target_currency_id, rate)
                 VALUES(?, ?, ?)
                 """;
-        try(var statement = DbHelper.getInstance().getConnection().prepareStatement(sqlInsert)){
+        try(var statement = DbHelper.getConnection().prepareStatement(sqlInsert)){
             statement.setInt(1, exchangeRate.baseCurrencyId());
             statement.setInt(2, exchangeRate.targetCurrencyId());
             statement.setBigDecimal(3, exchangeRate.rate());
@@ -29,7 +29,7 @@ public class ExchangeRatesDao{
     public List<ExchangeRate> getAll(){
         String sqlSelect = "SELECT * from `exchange_rates`";
 
-        try(var statement = DbHelper.getInstance().getConnection().prepareStatement(sqlSelect)){
+        try(var statement = DbHelper.getConnection().prepareStatement(sqlSelect)){
             ResultSet resultSet = statement.executeQuery();
             return mapResultSetToList(resultSet);
         } catch (SQLException e){
@@ -53,7 +53,7 @@ public class ExchangeRatesDao{
 
     public Optional<ExchangeRate> findById(Integer id){
         String sqlFind = "SELECT * FROM `exchange_rates` WHERE id = ?";
-        try(var statement = DbHelper.getInstance().getConnection().prepareStatement(sqlFind)){
+        try(var statement = DbHelper.getConnection().prepareStatement(sqlFind)){
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
             var result = mapResultSetToList(resultSet);
@@ -74,7 +74,7 @@ public class ExchangeRatesDao{
                  	rate = ?
                  WHERE id == ?
                 \s""";
-        try(var statement = DbHelper.getInstance().getConnection().prepareStatement(sqlUpdate)){
+        try(var statement = DbHelper.getConnection().prepareStatement(sqlUpdate)){
             if(exchangeRate.id() == null)
                 throw new NullPointerException("Id cannot be null, if you want update Exchange rate");
 

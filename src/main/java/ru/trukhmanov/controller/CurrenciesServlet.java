@@ -1,14 +1,14 @@
-package ru.trukhmanov.servlet;
+package ru.trukhmanov.controller;
 
 import com.google.gson.Gson;
+import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.trukhmanov.CurrenciesService;
-import ru.trukhmanov.entity.Currency;
-import ru.trukhmanov.entity.ErrorMassage;
+import ru.trukhmanov.service.CurrenciesService;
+import ru.trukhmanov.model.entity.Currency;
 import ru.trukhmanov.exception.RowAlreadyExist;
 
 import java.io.IOException;
@@ -16,20 +16,27 @@ import java.util.Optional;
 
 @WebServlet(name = "CurrenciesServlet", urlPatterns = "/currencies/*")
 public class CurrenciesServlet extends HttpServlet{
-    private final CurrenciesService currenciesService = new CurrenciesService();
-    private final Gson gson = new Gson();
+    private CurrenciesService currenciesService;
+    private Gson gson;
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+    public void init(ServletConfig config) throws ServletException{
+        super.init(config);
+        currenciesService = new CurrenciesService();
+        gson = new Gson();
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException{
         resp.setContentType("applicaton/json");
         resp.setCharacterEncoding("UTF-8");
 
         if(req.getPathInfo() != null) processGetSpecificCurrency(req, resp);
-        else processGetCurrencies(req, resp);
+        else processGetCurrencies(resp);
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException{
         resp.setContentType("applicaton/json");
         resp.setCharacterEncoding("UTF-8");
         var out = resp.getWriter();
@@ -74,7 +81,7 @@ public class CurrenciesServlet extends HttpServlet{
         }
     }
 
-    private void processGetCurrencies(HttpServletRequest req, HttpServletResponse resp) throws IOException{
+    private void processGetCurrencies(HttpServletResponse resp) throws IOException{
         var out = resp.getWriter();
         try{
             var result = currenciesService.getAllCurrencies();

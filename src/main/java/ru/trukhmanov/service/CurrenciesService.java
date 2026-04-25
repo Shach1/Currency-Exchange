@@ -1,7 +1,7 @@
-package ru.trukhmanov;
+package ru.trukhmanov.service;
 
-import ru.trukhmanov.dao.CurrenciesDao;
-import ru.trukhmanov.entity.Currency;
+import ru.trukhmanov.model.dao.CurrenciesDao;
+import ru.trukhmanov.model.entity.Currency;
 import ru.trukhmanov.exception.RowAlreadyExist;
 
 import java.util.List;
