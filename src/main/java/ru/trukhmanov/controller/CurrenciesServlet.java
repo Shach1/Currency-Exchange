@@ -4,18 +4,18 @@ import com.google.gson.Gson;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.trukhmanov.service.CurrenciesService;
-import ru.trukhmanov.model.entity.Currency;
 import ru.trukhmanov.exception.RowAlreadyExist;
+import ru.trukhmanov.model.entity.Currency;
+import ru.trukhmanov.service.CurrenciesService;
+import ru.trukhmanov.service.dto.ErrorMassage;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.NoSuchElementException;
 
 @WebServlet(name = "CurrenciesServlet", urlPatterns = "/currencies/*")
-public class CurrenciesServlet extends HttpServlet{
+public class CurrenciesServlet extends RestServlet{
     private CurrenciesService currenciesService;
     private Gson gson;
 
@@ -28,8 +28,7 @@ public class CurrenciesServlet extends HttpServlet{
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException{
-        resp.setContentType("applicaton/json");
-        resp.setCharacterEncoding("UTF-8");
+        configureRestResponse(resp);
 
         if(req.getPathInfo() != null) processGetSpecificCurrency(req, resp);
         else processGetCurrencies(resp);
@@ -37,8 +36,7 @@ public class CurrenciesServlet extends HttpServlet{
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException{
-        resp.setContentType("applicaton/json");
-        resp.setCharacterEncoding("UTF-8");
+        configureRestResponse(resp);
         var out = resp.getWriter();
 
         var name = req.getParameter("name");
@@ -47,10 +45,8 @@ public class CurrenciesServlet extends HttpServlet{
 
         try{
             var result = currenciesService.createCurrency(code, name, sign);
-            if(result.isPresent()){
-                resp.setStatus(201);
-                out.println(gson.toJson(result.get()));
-            }
+            resp.setStatus(201);
+            out.println(gson.toJson(result));
         } catch (NoSuchFieldException e){
             resp.setStatus(400);
             out.println(gson.toJson(new ErrorMassage(e.getMessage())));
@@ -67,14 +63,12 @@ public class CurrenciesServlet extends HttpServlet{
         var out = resp.getWriter();
         String pathVar = req.getPathInfo().substring(1);
         try{
-            Optional<Currency> result = currenciesService.getCurrencyBuCode(pathVar);
-            if(result.isPresent()){
-                resp.setStatus(200);
-                out.println(gson.toJson(result.get()));
-            } else{
-                resp.setStatus(404);
-                out.println(gson.toJson(new ErrorMassage("Currency not found")));
-            }
+            Currency result = currenciesService.getCurrencyByCode(pathVar);
+            resp.setStatus(200);
+            out.println(gson.toJson(result));
+        } catch (NoSuchElementException e){
+            resp.setStatus(404);
+            out.println(gson.toJson(new ErrorMassage(e.getMessage())));
         } catch (RuntimeException e){
             resp.setStatus(500);
             out.println(gson.toJson(new ErrorMassage("Database is unavailable")));

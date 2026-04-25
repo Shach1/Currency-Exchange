@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class ExchangeRatesDao{
-    public boolean insect(ExchangeRate exchangeRate){
+    public boolean insert(ExchangeRate exchangeRate){
         String sqlInsert = """
                 INSERT INTO `exchange_rates`(base_currency_id, target_currency_id, rate)
                 VALUES(?, ?, ?)
@@ -55,6 +55,24 @@ public class ExchangeRatesDao{
         String sqlFind = "SELECT * FROM `exchange_rates` WHERE id = ?";
         try(var statement = DbHelper.getConnection().prepareStatement(sqlFind)){
             statement.setInt(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            var result = mapResultSetToList(resultSet);
+            if(result.isEmpty()) return Optional.empty();
+            return Optional.of(result.getFirst());
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Optional<ExchangeRate> findByCurrenciesId(Integer baseCurrencyId, Integer targetCurrencyId){
+        String sqlFind = """
+        SELECT * FROM `exchange_rates`
+        WHERE base_currency_id = ? AND target_currency_id = ?
+        """;
+        try(var statement = DbHelper.getConnection().prepareStatement(sqlFind)){
+            statement.setInt(1, baseCurrencyId);
+            statement.setInt(2, targetCurrencyId);
             ResultSet resultSet = statement.executeQuery();
             var result = mapResultSetToList(resultSet);
             if(result.isEmpty()) return Optional.empty();
