@@ -15,7 +15,9 @@ public class ExchangeRatesDao{
                 INSERT INTO `exchange_rates`(base_currency_id, target_currency_id, rate)
                 VALUES(?, ?, ?)
                 """;
-        try(var statement = DbHelper.getConnection().prepareStatement(sqlInsert)){
+        try(var connection = DbHelper.getConnection();
+            var statement = connection.prepareStatement(sqlInsert)
+        ){
             statement.setInt(1, exchangeRate.baseCurrencyId());
             statement.setInt(2, exchangeRate.targetCurrencyId());
             statement.setBigDecimal(3, exchangeRate.rate());
@@ -29,7 +31,9 @@ public class ExchangeRatesDao{
     public List<ExchangeRate> getAll(){
         String sqlSelect = "SELECT * from `exchange_rates`";
 
-        try(var statement = DbHelper.getConnection().prepareStatement(sqlSelect)){
+        try(var connection = DbHelper.getConnection();
+            var statement = connection.prepareStatement(sqlSelect)
+        ){
             ResultSet resultSet = statement.executeQuery();
             return mapResultSetToList(resultSet);
         } catch (SQLException e){
@@ -42,7 +46,11 @@ public class ExchangeRatesDao{
         List<ExchangeRate> list = new ArrayList<>();
         try{
             while(resultSet.next()){
-                list.add(new ExchangeRate(resultSet.getInt(1), resultSet.getInt(2), resultSet.getInt(3), resultSet.getBigDecimal(4)));
+                list.add(new ExchangeRate(
+                        resultSet.getInt(1),
+                        resultSet.getInt(2),
+                        resultSet.getInt(3),
+                        resultSet.getBigDecimal(4)));
             }
         } catch (SQLException e){
             System.out.println(e.getMessage());
@@ -53,7 +61,9 @@ public class ExchangeRatesDao{
 
     public Optional<ExchangeRate> findById(Integer id){
         String sqlFind = "SELECT * FROM `exchange_rates` WHERE id = ?";
-        try(var statement = DbHelper.getConnection().prepareStatement(sqlFind)){
+        try(var connection = DbHelper.getConnection();
+            var statement = connection.prepareStatement(sqlFind)
+        ){
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
             var result = mapResultSetToList(resultSet);
@@ -70,7 +80,9 @@ public class ExchangeRatesDao{
         SELECT * FROM `exchange_rates`
         WHERE base_currency_id = ? AND target_currency_id = ?
         """;
-        try(var statement = DbHelper.getConnection().prepareStatement(sqlFind)){
+        try(var connection = DbHelper.getConnection();
+            var statement = connection.prepareStatement(sqlFind)
+        ){
             statement.setInt(1, baseCurrencyId);
             statement.setInt(2, targetCurrencyId);
             ResultSet resultSet = statement.executeQuery();
@@ -92,7 +104,10 @@ public class ExchangeRatesDao{
                  	rate = ?
                  WHERE id == ?
                 \s""";
-        try(var statement = DbHelper.getConnection().prepareStatement(sqlUpdate)){
+        try(var connection = DbHelper.getConnection();
+            var statement = connection.prepareStatement(sqlUpdate)
+        ){
+            // TODO: перенести проверки в сервис уровень
             if(exchangeRate.id() == null)
                 throw new NullPointerException("Id cannot be null, if you want update Exchange rate");
 

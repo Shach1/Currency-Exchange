@@ -29,7 +29,7 @@ public class ExchangeRatesService{
         }
     }
 
-    public ExchangeRateDto getExchangeRateByCodePair(String codePair) throws InvalidRequestFormat, ExchangeRateNotFound{
+    public ExchangeRateDto getExchangeRateByCodePair(String codePair){
         if(codePair.length() != 6) throw new InvalidRequestFormat();
         String baseCurrencyCode = codePair.substring(0, 3);
         String targetCurrencyCode = codePair.substring(3, 6);
@@ -43,7 +43,7 @@ public class ExchangeRatesService{
         }
     }
 
-    public ExchangeRateDto getExchangeRateByCurrenciesId(Integer baseCurrencyId, Integer targetCurrencyId) throws ExchangeRateNotFound{
+    public ExchangeRateDto getExchangeRateByCurrenciesId(Integer baseCurrencyId, Integer targetCurrencyId){
         var result = ratesDao.findByCurrenciesId(baseCurrencyId, targetCurrencyId);
         if(result.isEmpty()) throw new ExchangeRateNotFound("Exchange rate not found for the pair");
         return mapToExchangeRateDto(result.get());
@@ -51,7 +51,7 @@ public class ExchangeRatesService{
 
     public ExchangeRateDto createExchangeRateByCodePair(String baseCurrencyCode,
                                                         String targetCurrencyCode,
-                                                        String rate) throws MissingFormField, InvalidRequestFormat, CurrencyNotFound, ExchangeRateAlreadyExist{
+                                                        String rate){
         if(baseCurrencyCode == null || baseCurrencyCode.isEmpty() ||
                 targetCurrencyCode == null || targetCurrencyCode.isEmpty() ||
                 rate == null || rate.isEmpty()){throw new MissingFormField();}

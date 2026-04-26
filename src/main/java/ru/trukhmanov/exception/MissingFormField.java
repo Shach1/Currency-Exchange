@@ -1,6 +1,6 @@
 package ru.trukhmanov.exception;
 
-public class MissingFormField extends Exception{
+public class MissingFormField extends RuntimeException{
     public MissingFormField(String message){
         super(message);
     }

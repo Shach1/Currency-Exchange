@@ -1,6 +1,6 @@
 package ru.trukhmanov.exception;
 
-public class ExchangeRateAlreadyExist extends Exception{
+public class ExchangeRateAlreadyExist extends RuntimeException{
     public ExchangeRateAlreadyExist(String message){
         super(message);
     }

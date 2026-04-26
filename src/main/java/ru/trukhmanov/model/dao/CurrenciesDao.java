@@ -1,5 +1,6 @@
 package ru.trukhmanov.model.dao;
 
+import ru.trukhmanov.exception.DatabaseException;
 import ru.trukhmanov.model.entity.Currency;
 import ru.trukhmanov.util.DbHelper;
 
@@ -15,32 +16,37 @@ public class CurrenciesDao{
                 INSERT INTO `currencies`(code, full_name, sign)
                 VALUES(?, ?, ?)
                 """;
-        try(var statement = DbHelper.getConnection().prepareStatement(sqlInsert)){
+        try(var connection = DbHelper.getConnection();
+            var statement = connection.prepareStatement(sqlInsert)
+        ){
             statement.setString(1, currency.code());
             statement.setString(2, currency.fullName());
             statement.setString(3, currency.sign());
             return statement.executeUpdate() == 1;
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            throw new DatabaseException();
         }
     }
 
     public List<Currency> getAll(){
         String sqlSelect = "SELECT * from `currencies`";
 
-        try(var statement = DbHelper.getConnection().prepareStatement(sqlSelect)){
+        try(var connection = DbHelper.getConnection();
+            var statement = connection.prepareStatement(sqlSelect)
+        ){
             ResultSet resultSet = statement.executeQuery();
             return mapResultSetToList(resultSet);
         } catch (SQLException e){
-            System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            throw new DatabaseException();
         }
     }
 
     public Optional<Currency> findById(Integer id){
         String sqlFind = "SELECT * FROM `currencies` WHERE id = ?";
-        try(var statement = DbHelper.getConnection().prepareStatement(sqlFind)){
+        try(var connection = DbHelper.getConnection();
+            var statement = connection.prepareStatement(sqlFind)
+        ){
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
             var result = mapResultSetToList(resultSet);
@@ -48,13 +54,15 @@ public class CurrenciesDao{
             return Optional.of(result.getFirst());
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            throw new DatabaseException();
         }
     }
 
     public Optional<Currency> findByCode(String code){
         String sqlFind = "SELECT * FROM `currencies` WHERE code = ?";
-        try(var statement = DbHelper.getConnection().prepareStatement(sqlFind)){
+        try(var connection = DbHelper.getConnection();
+            var statement = connection.prepareStatement(sqlFind)
+        ){
             statement.setString(1, code);
             ResultSet resultSet = statement.executeQuery();
             var result = mapResultSetToList(resultSet);
@@ -62,7 +70,7 @@ public class CurrenciesDao{
             return Optional.of(result.getFirst());
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            throw new DatabaseException();
         }
     }
 
@@ -79,7 +87,7 @@ public class CurrenciesDao{
             }
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            throw new DatabaseException();
         }
         return list;
     }
@@ -93,7 +101,10 @@ public class CurrenciesDao{
                  	sign = ?
                  WHERE id == ?
                 \s""";
-        try(var statement = DbHelper.getConnection().prepareStatement(sqlUpdate)){
+        try(var connection = DbHelper.getConnection();
+            var statement = connection.prepareStatement(sqlUpdate)
+        ){
+            //TODO: перенести проверки в сервис
             if(currency.id() == null) throw new NullPointerException("Id cannot be null, if you want update Currency");
             if(findById(currency.id()).isEmpty())
                 throw new RuntimeException("Currency with id = " + currency.id() + " not found");
@@ -104,7 +115,7 @@ public class CurrenciesDao{
             return statement.executeUpdate() == 1;
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            throw new DatabaseException();
         }
     }
 }
