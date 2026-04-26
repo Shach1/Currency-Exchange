@@ -1,5 +1,6 @@
 package ru.trukhmanov.model.dao;
 
+import ru.trukhmanov.exception.DatabaseException;
 import ru.trukhmanov.model.entity.ExchangeRate;
 import ru.trukhmanov.util.DbHelper;
 
@@ -24,7 +25,7 @@ public class ExchangeRatesDao{
             return statement.executeUpdate() == 1;
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            throw new DatabaseException();
         }
     }
 
@@ -38,7 +39,7 @@ public class ExchangeRatesDao{
             return mapResultSetToList(resultSet);
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            throw new DatabaseException();
         }
     }
 
@@ -54,7 +55,7 @@ public class ExchangeRatesDao{
             }
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            throw new DatabaseException();
         }
         return list;
     }
@@ -71,7 +72,7 @@ public class ExchangeRatesDao{
             return Optional.of(result.getFirst());
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            throw new DatabaseException();
         }
     }
 
@@ -91,42 +92,26 @@ public class ExchangeRatesDao{
             return Optional.of(result.getFirst());
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            throw new DatabaseException();
         }
     }
 
-    public boolean update(ExchangeRate exchangeRate){
+    public boolean updateRate(ExchangeRate exchangeRate){
         String sqlUpdate = """
-                 UPDATE `exchange_rates`
-                 SET\s
-                 	base_currency_id = ?,
-                 	target_currency_id = ?,
-                 	rate = ?
-                 WHERE id == ?
-                \s""";
+                UPDATE `exchange_rates`
+                SET rate = ?
+                WHERE base_currency_id = ? and target_currency_id = ?
+                """;
         try(var connection = DbHelper.getConnection();
             var statement = connection.prepareStatement(sqlUpdate)
         ){
-            // TODO: перенести проверки в сервис уровень
-            if(exchangeRate.id() == null)
-                throw new NullPointerException("Id cannot be null, if you want update Exchange rate");
-
-            var optionalOldRate = findById(exchangeRate.id());
-            if(optionalOldRate.isEmpty())
-                throw new RuntimeException("Exchange rate with id = " + exchangeRate.id() + " not found");
-            ExchangeRate oldRate = optionalOldRate.get();
-            if(!oldRate.baseCurrencyId().equals(exchangeRate.baseCurrencyId()) ||
-                    !oldRate.targetCurrencyId().equals(exchangeRate.targetCurrencyId()))
-                throw new RuntimeException("Only rate can be changed");
-
-            statement.setInt(1, exchangeRate.baseCurrencyId());
-            statement.setInt(2, exchangeRate.targetCurrencyId());
-            statement.setBigDecimal(3, exchangeRate.rate());
-            statement.setInt(4, exchangeRate.id());
+            statement.setBigDecimal(1, exchangeRate.rate());
+            statement.setInt(2, exchangeRate.baseCurrencyId());
+            statement.setInt(3, exchangeRate.targetCurrencyId());
             return statement.executeUpdate() == 1;
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            throw new DatabaseException();
         }
     }
 }

@@ -1,54 +1,91 @@
 package ru.trukhmanov.service;
 
+import ru.trukhmanov.service.dto.CreateCurrencyRequest;
+import ru.trukhmanov.service.dto.UpdateCurrencyRequest;
 import ru.trukhmanov.exception.*;
 import ru.trukhmanov.model.dao.CurrenciesDao;
 import ru.trukhmanov.model.entity.Currency;
-import ru.trukhmanov.service.dto.CurrencyDto;
+import ru.trukhmanov.service.dto.CurrencyResponse;
+import ru.trukhmanov.util.Patterns;
 
 import java.util.List;
 
 public class CurrenciesService{
     private final CurrenciesDao currenciesDao = new CurrenciesDao();
 
-    public List<CurrencyDto> getAllCurrencies(){
-        System.out.println("getAllCurrencies service");
+    public List<CurrencyResponse> getAllCurrencies(){
         return currenciesDao.getAll().stream()
                 .map(this::mapToCurrencyDto)
                 .toList();
     }
 
-    public CurrencyDto mapToCurrencyDto(Currency currency){
-        return new CurrencyDto(
+    public CurrencyResponse mapToCurrencyDto(Currency currency){
+        return new CurrencyResponse(
                 currency.id(),
                 currency.code(),
                 currency.fullName(),
                 currency.sign());
     }
 
-    public CurrencyDto getCurrencyByCode(String code){
+    public CurrencyResponse getCurrencyByCode(String code){
         if(code == null || code.length() != 3) throw new InvalidRequestFormat();
         var result = currenciesDao.findByCode(code);
         if(result.isEmpty()) throw new CurrencyNotFound("Currency with code: %s not found".formatted(code));
         return mapToCurrencyDto(result.get());
     }
 
-    public CurrencyDto getCurrencyById(Integer id ){
+    public CurrencyResponse getCurrencyById(Integer id ){
         var result = currenciesDao.findById(id);
-        if(result.isEmpty()) throw new CurrencyNotFound("Currency not found");
+        if(result.isEmpty()) throw new CurrencyNotFound();
         return mapToCurrencyDto(result.get());
     }
 
-    public CurrencyDto createCurrency(String code, String name, String sigh){
-        if(name == null || name.isEmpty() ||
-                code == null || code.isEmpty() ||
-                sigh == null || sigh.isEmpty()) throw new MissingFormField();
-
-        if(currenciesDao.findByCode(code).isPresent()){
+    public CurrencyResponse createCurrency(CreateCurrencyRequest request){
+        var currency = parseCreateCurrencyRequest(request);
+        if(currenciesDao.findByCode(currency.code()).isPresent()){
             throw new CurrencyAlreadyExist("A currency with this code already exists");
         }
-        currenciesDao.insert(new Currency(null, code, name, sigh));
-        var currency = currenciesDao.findByCode(code);
-        if(currency.isEmpty()) throw new RuntimeException("Unsuspected problem");
-        return mapToCurrencyDto(currency.get());
+        currenciesDao.insert(currency);
+        var newCurrency = currenciesDao.findByCode(currency.code());
+        if(newCurrency.isEmpty()) throw new UnsuspectedException();
+        return mapToCurrencyDto(newCurrency.get());
+    }
+
+    private Currency parseCreateCurrencyRequest(CreateCurrencyRequest request){
+        if(request.name() == null || request.name().isEmpty()) throw new MissingFormField("%s form field is missing".formatted("name"));
+        if(request.code() == null || request.code().isEmpty()) throw new MissingFormField("%s form field is missing".formatted("code"));
+        if(request.sign() == null || request.sign().isEmpty()) throw new MissingFormField("%s form field is missing".formatted("sign"));
+        var currency = new Currency(null, request.code(), request.name(), request.sign());
+        validateCurrency(currency);
+        return currency;
+    }
+
+    private void validateCurrency(Currency currency){
+        if(currency.code() == null) throw new InvalidValue("Code cannot be null");
+        if(currency.code().length() != 3) throw new InvalidValue("Code length must be equal 3");
+        if(!Patterns.ENG_LETTERS.matcher(currency.code()).matches()) throw new InvalidValue("Code must consist entirely of letters");
+
+        if(currency.fullName() == null) throw new InvalidValue("Full name cannot be null");
+        if(currency.fullName().length() < 3 || currency.fullName().length() > 20) throw new InvalidValue("Full name length cannot be less than 3 and more than 20");
+        if(!Patterns.ENG_LETTERS_AND_SPACES_BETWEEN_WORDS.matcher(currency.fullName()).matches()) throw new InvalidValue("Full name can contain only letters and spaces between words");
+
+        if(currency.sign() == null) throw new InvalidValue("Sign cannot be null");
+        if(currency.sign().isEmpty() || currency.sign().length()> 4) throw new InvalidValue("Sign length cannot be less than 1 and more than 4");
+    }
+
+    public CurrencyResponse updateCurrency(UpdateCurrencyRequest request){
+        var currency = parseUpdateCurrencyRequest(request);
+        if(currenciesDao.findById(currency.id()).isEmpty()) throw new CurrencyNotFound("Currency with id: %s not found".formatted(request.id()));
+        currenciesDao.update(currency);
+        var updatedCurrency = currenciesDao.findById(currency.id());
+        if(updatedCurrency.isEmpty()) throw new UnsuspectedException();
+        return mapToCurrencyDto(updatedCurrency.get());
+    }
+
+    private Currency parseUpdateCurrencyRequest(UpdateCurrencyRequest request){
+        if(request.id() == null) throw new MissingFormField("%s form field is missing".formatted("id"));
+        Integer id =  Integer.valueOf(request.id());
+        var currency = parseCreateCurrencyRequest(new CreateCurrencyRequest(request.code(), request.name(), request.sign()));
+        return new Currency(id, currency.code(), currency.fullName(), currency.sign());
     }
 }

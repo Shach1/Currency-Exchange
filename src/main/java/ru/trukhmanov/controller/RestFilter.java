@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.trukhmanov.exception.*;
-import ru.trukhmanov.service.dto.ErrorMassage;
+import ru.trukhmanov.service.dto.ErrorMessage;
 
 import java.io.IOException;
 
@@ -19,21 +19,25 @@ public class RestFilter extends HttpFilter{
     @Override
     protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException{
         var out = res.getWriter();
-
+        res.setContentType("application/json");
+        res.setCharacterEncoding("UTF-8");
         try{
             super.doFilter(req, res, chain);
-        } catch (InvalidRequestFormat | MissingFormField e){
+        } catch (InvalidRequestFormat | InvalidValue | MissingFormField | IllegalArgumentException e){
             res.setStatus(400);
-            out.println(gson.toJson(new ErrorMassage(e.getMessage())));
+            out.println(gson.toJson(new ErrorMessage(e.getMessage())));
         } catch (CurrencyNotFound | ExchangeRateNotFound e){
             res.setStatus(404);
-            out.println(gson.toJson(new ErrorMassage(e.getMessage())));
+            out.println(gson.toJson(new ErrorMessage(e.getMessage())));
         } catch (CurrencyAlreadyExist | ExchangeRateAlreadyExist e){
             res.setStatus(409);
-            out.println(gson.toJson(new ErrorMassage(e.getMessage())));
-        } catch (DatabaseException e){
+            out.println(gson.toJson(new ErrorMessage(e.getMessage())));
+        } catch (DatabaseException | UnsuspectedException e){
             res.setStatus(500);
-            out.println(gson.toJson(new ErrorMassage(e.getMessage())));
+            out.println(gson.toJson(new ErrorMessage(e.getMessage())));
+        } catch (Exception e){
+            res.setStatus(500);
+            out.println(gson.toJson(new ErrorMessage("Unknown error")));
         }
     }
 }

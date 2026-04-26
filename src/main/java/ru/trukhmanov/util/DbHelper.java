@@ -1,5 +1,7 @@
 package ru.trukhmanov.util;
 
+import ru.trukhmanov.exception.DatabaseException;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -16,7 +18,7 @@ public class DbHelper{
             connection.setAutoCommit(true);
             return connection;
         } catch (SQLException | ClassNotFoundException e){
-            throw new RuntimeException(e);
+            throw new DatabaseException();
         }
     }
 }

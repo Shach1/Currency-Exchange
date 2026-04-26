@@ -1,11 +1,8 @@
-package ru.trukhmanov.model.entity;
+package ru.trukhmanov.service.dto;
 
-public record Currency(
+public record CurrencyResponse(
         Integer id,
         String code,
         String fullName,
         String sign
-){
-}
-
-
+){}

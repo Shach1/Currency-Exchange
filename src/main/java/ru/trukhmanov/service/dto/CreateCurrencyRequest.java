@@ -1,8 +1,8 @@
 package ru.trukhmanov.service.dto;
 
-public record CurrencyDto(
-        Integer id,
+public record CreateCurrencyRequest(
         String code,
-        String fullName,
+        String name,
         String sign
-){}
+){
+}

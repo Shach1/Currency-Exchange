@@ -104,10 +104,6 @@ public class CurrenciesDao{
         try(var connection = DbHelper.getConnection();
             var statement = connection.prepareStatement(sqlUpdate)
         ){
-            //TODO: перенести проверки в сервис
-            if(currency.id() == null) throw new NullPointerException("Id cannot be null, if you want update Currency");
-            if(findById(currency.id()).isEmpty())
-                throw new RuntimeException("Currency with id = " + currency.id() + " not found");
             statement.setString(1, currency.code());
             statement.setString(2, currency.fullName());
             statement.setString(3, currency.sign());
