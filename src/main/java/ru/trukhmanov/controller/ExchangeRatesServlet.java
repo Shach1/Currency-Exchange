@@ -7,8 +7,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.trukhmanov.service.dto.CreateExchangeRateRequest;
+import ru.trukhmanov.exception.InvalidRequestFormat;
+import ru.trukhmanov.service.dto.request.CreateExchangeRateRequest;
 import ru.trukhmanov.service.ExchangeRatesService;
+import ru.trukhmanov.service.dto.request.UpdateExchangeRateRequest;
 
 import java.io.IOException;
 
@@ -32,9 +34,9 @@ public class ExchangeRatesServlet extends HttpServlet{
 
     private void processGetSpecificExchangeRate(HttpServletRequest req, HttpServletResponse resp) throws IOException{
         var out = resp.getWriter();
-        String pathVar = req.getPathInfo().substring(1);
+        String codePair = req.getPathInfo().substring(1);
 
-        var result = ratesService.getExchangeRateByCodePair(pathVar);
+        var result = ratesService.getExchangeRate(codePair);
         resp.setStatus(200);
         out.println(gson.toJson(result));
     }
@@ -57,6 +59,19 @@ public class ExchangeRatesServlet extends HttpServlet{
 
         var result = ratesService.createExchangeRate(request);
         resp.setStatus(201);
+        out.println(gson.toJson(result));
+    }
+
+    @Override
+    protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException{
+        var out = resp.getWriter();
+
+        if(req.getPathInfo() == null) throw new InvalidRequestFormat();
+        var codePair = req.getPathInfo().substring(1);
+        String rate = req.getParameter("rate");
+
+        var result = ratesService.updateExchangeRate(new UpdateExchangeRateRequest(codePair, rate));
+        resp.setStatus(200);
         out.println(gson.toJson(result));
     }
 }

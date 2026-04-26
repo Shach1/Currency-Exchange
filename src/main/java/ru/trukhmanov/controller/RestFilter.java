@@ -2,13 +2,12 @@ package ru.trukhmanov.controller;
 
 import com.google.gson.Gson;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.trukhmanov.exception.*;
-import ru.trukhmanov.service.dto.ErrorMessage;
+import ru.trukhmanov.service.dto.response.ErrorMessage;
 
 import java.io.IOException;
 
@@ -17,7 +16,7 @@ public class RestFilter extends HttpFilter{
     Gson gson = new Gson();
 
     @Override
-    protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException{
+    protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException{
         var out = res.getWriter();
         res.setContentType("application/json");
         res.setCharacterEncoding("UTF-8");

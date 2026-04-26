@@ -1,4 +1,4 @@
-package ru.trukhmanov.service.dto;
+package ru.trukhmanov.service.dto.response;
 
 public record CurrencyResponse(
         Integer id,

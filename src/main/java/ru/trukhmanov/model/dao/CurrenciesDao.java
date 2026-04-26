@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class CurrenciesDao{
-    public boolean insert(Currency currency){
+    public void insert(Currency currency){
         String sqlInsert = """
                 INSERT INTO `currencies`(code, full_name, sign)
                 VALUES(?, ?, ?)
@@ -22,7 +22,7 @@ public class CurrenciesDao{
             statement.setString(1, currency.code());
             statement.setString(2, currency.fullName());
             statement.setString(3, currency.sign());
-            return statement.executeUpdate() == 1;
+            statement.executeUpdate();
         } catch (SQLException e){
             System.out.println(e.getMessage());
             throw new DatabaseException();
@@ -92,7 +92,7 @@ public class CurrenciesDao{
         return list;
     }
 
-    public boolean update(Currency currency){
+    public void update(Currency currency){
         String sqlUpdate = """
                  UPDATE `currencies`
                  SET\s
@@ -108,7 +108,7 @@ public class CurrenciesDao{
             statement.setString(2, currency.fullName());
             statement.setString(3, currency.sign());
             statement.setInt(4, currency.id());
-            return statement.executeUpdate() == 1;
+            statement.executeUpdate();
         } catch (SQLException e){
             System.out.println(e.getMessage());
             throw new DatabaseException();

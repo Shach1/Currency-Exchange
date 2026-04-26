@@ -3,8 +3,10 @@ package ru.trukhmanov.service;
 import ru.trukhmanov.exception.*;
 import ru.trukhmanov.model.dao.ExchangeRatesDao;
 import ru.trukhmanov.model.entity.ExchangeRate;
-import ru.trukhmanov.service.dto.CreateExchangeRateRequest;
-import ru.trukhmanov.service.dto.ExchangeRateResponse;
+import ru.trukhmanov.service.dto.request.CreateExchangeRateRequest;
+import ru.trukhmanov.service.dto.request.UpdateExchangeRateRequest;
+import ru.trukhmanov.service.dto.response.ExchangeRateResponse;
+import ru.trukhmanov.util.Parser;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -17,17 +19,21 @@ public class ExchangeRatesService{
     public List<ExchangeRateResponse> getAllExchangeRates(){
         return ratesDao.getAll()
                 .stream()
-                .map(this::mapToExchangeRateDto)
+                .map(this::mapToExchangeRateResponse)
                 .toList();
     }
 
-    public ExchangeRateResponse mapToExchangeRateDto(ExchangeRate exchangeRate){
+    private ExchangeRateResponse mapToExchangeRateResponse(ExchangeRate exchangeRate){
         var currency1 = currenciesService.getCurrencyById(exchangeRate.baseCurrencyId());
         var currency2 = currenciesService.getCurrencyById(exchangeRate.targetCurrencyId());
         return new ExchangeRateResponse(exchangeRate.id(), currency1, currency2, exchangeRate.rate());
     }
 
-    public ExchangeRateResponse getExchangeRateByCodePair(String codePair){
+    public ExchangeRateResponse getExchangeRate(String codePair){
+        return mapToExchangeRateResponse(getExchangeRateByCodePair(codePair));
+    }
+
+    private ExchangeRate getExchangeRateByCodePair(String codePair){
         if(codePair.length() != 6) throw new InvalidRequestFormat();
         String baseCurrencyCode = codePair.substring(0, 3);
         String targetCurrencyCode = codePair.substring(3, 6);
@@ -41,10 +47,10 @@ public class ExchangeRatesService{
         }
     }
 
-    public ExchangeRateResponse getExchangeRateByCurrenciesId(Integer baseCurrencyId, Integer targetCurrencyId){
+    private ExchangeRate getExchangeRateByCurrenciesId(Integer baseCurrencyId, Integer targetCurrencyId){
         var result = ratesDao.findByCurrenciesId(baseCurrencyId, targetCurrencyId);
         if(result.isEmpty()) throw new ExchangeRateNotFound("Exchange rate not found for the pair");
-        return mapToExchangeRateDto(result.get());
+        return result.get();
     }
 
     public ExchangeRateResponse createExchangeRate(CreateExchangeRateRequest request){
@@ -55,7 +61,7 @@ public class ExchangeRatesService{
         ratesDao.insert(exchangeRate);
         var newExchangeRate = ratesDao.findByCurrenciesId(exchangeRate.baseCurrencyId(), exchangeRate.targetCurrencyId());
         if(newExchangeRate.isEmpty()) throw new UnsuspectedException();
-        return mapToExchangeRateDto(newExchangeRate.get());
+        return mapToExchangeRateResponse(newExchangeRate.get());
     }
 
     private ExchangeRate parseCreateExchangeRateRequest(CreateExchangeRateRequest request){
@@ -64,10 +70,7 @@ public class ExchangeRatesService{
                 request.rate() == null || request.rate().isEmpty()){
             throw new MissingFormField();
         }
-
-        //TODO: как-то валидировать поле, чтобы не было ошибки при создании BigDecimal
-        var rateDecimal = new BigDecimal(request.rate());
-
+        var rateDecimal = Parser.parseBigDecimal(request.rate());
         var currency1 = currenciesService.getCurrencyByCode(request.baseCurrencyCode());
         var currency2 = currenciesService.getCurrencyByCode(request.targetCurrencyCode());
         return getValidatedExchangeRate(new ExchangeRate(null, currency1.id(), currency2.id(), rateDecimal));
@@ -92,12 +95,15 @@ public class ExchangeRatesService{
         );
     }
 
-    public ExchangeRateResponse updateExchangeRate(CreateExchangeRateRequest request){
-        var exchangeRate = parseCreateExchangeRateRequest(request);
-        if(ratesDao.findByCurrenciesId(exchangeRate.baseCurrencyId(), exchangeRate.targetCurrencyId()).isEmpty()){
-            throw new ExchangeRateNotFound("Exchange rate not found for the pair");
-        }
-        ratesDao.updateRate(exchangeRate);
-        return getExchangeRateByCurrenciesId(exchangeRate.baseCurrencyId(), exchangeRate.targetCurrencyId());
+    public ExchangeRateResponse updateExchangeRate(UpdateExchangeRateRequest request){
+        if(request.rate() == null) throw new InvalidRequestFormat();
+        var exchangeRate = getExchangeRateByCodePair(request.codePair());
+        ratesDao.updateRate(getValidatedExchangeRate(new ExchangeRate(
+                exchangeRate.id(),
+                exchangeRate.baseCurrencyId(),
+                exchangeRate.targetCurrencyId(),
+                Parser.parseBigDecimal(request.rate())
+        )));
+        return mapToExchangeRateResponse(getExchangeRateByCurrenciesId(exchangeRate.baseCurrencyId(), exchangeRate.targetCurrencyId()));
     }
 }

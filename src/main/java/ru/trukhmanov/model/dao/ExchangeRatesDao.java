@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class ExchangeRatesDao{
-    public boolean insert(ExchangeRate exchangeRate){
+    public void insert(ExchangeRate exchangeRate){
         String sqlInsert = """
                 INSERT INTO `exchange_rates`(base_currency_id, target_currency_id, rate)
                 VALUES(?, ?, ?)
@@ -22,7 +22,7 @@ public class ExchangeRatesDao{
             statement.setInt(1, exchangeRate.baseCurrencyId());
             statement.setInt(2, exchangeRate.targetCurrencyId());
             statement.setBigDecimal(3, exchangeRate.rate());
-            return statement.executeUpdate() == 1;
+            statement.executeUpdate();
         } catch (SQLException e){
             System.out.println(e.getMessage());
             throw new DatabaseException();
@@ -96,7 +96,7 @@ public class ExchangeRatesDao{
         }
     }
 
-    public boolean updateRate(ExchangeRate exchangeRate){
+    public void updateRate(ExchangeRate exchangeRate){
         String sqlUpdate = """
                 UPDATE `exchange_rates`
                 SET rate = ?
@@ -108,7 +108,7 @@ public class ExchangeRatesDao{
             statement.setBigDecimal(1, exchangeRate.rate());
             statement.setInt(2, exchangeRate.baseCurrencyId());
             statement.setInt(3, exchangeRate.targetCurrencyId());
-            return statement.executeUpdate() == 1;
+            statement.executeUpdate();
         } catch (SQLException e){
             System.out.println(e.getMessage());
             throw new DatabaseException();
