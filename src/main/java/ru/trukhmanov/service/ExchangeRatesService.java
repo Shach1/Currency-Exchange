@@ -13,6 +13,8 @@ import java.math.RoundingMode;
 import java.util.List;
 
 public class ExchangeRatesService{
+    public static final Integer SCALE = 6;
+    public static final RoundingMode ROUNDING_MODE = RoundingMode.DOWN;
     private final ExchangeRatesDao ratesDao = new ExchangeRatesDao();
     private final CurrenciesService currenciesService = new CurrenciesService();
 
@@ -47,7 +49,7 @@ public class ExchangeRatesService{
         }
     }
 
-    private ExchangeRate getExchangeRateByCurrenciesId(Integer baseCurrencyId, Integer targetCurrencyId){
+    protected ExchangeRate getExchangeRateByCurrenciesId(Integer baseCurrencyId, Integer targetCurrencyId){
         var result = ratesDao.findByCurrenciesId(baseCurrencyId, targetCurrencyId);
         if(result.isEmpty()) throw new ExchangeRateNotFound("Exchange rate not found for the pair");
         return result.get();
