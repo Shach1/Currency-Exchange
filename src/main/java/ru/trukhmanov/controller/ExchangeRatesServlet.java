@@ -14,7 +14,7 @@ import ru.trukhmanov.service.dto.request.UpdateExchangeRateRequest;
 
 import java.io.IOException;
 
-@WebServlet(name = "ExchangeRatesServlet", urlPatterns = "/exchangeRates/*")
+@WebServlet(name = "ExchangeRatesServlet", urlPatterns = {"/exchangeRates", "/exchangeRate/*"})
 public class ExchangeRatesServlet extends HttpServlet{
     private ExchangeRatesService ratesService;
     private Gson gson;

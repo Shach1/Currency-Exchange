@@ -12,7 +12,7 @@ import ru.trukhmanov.service.CurrenciesService;
 
 import java.io.IOException;
 
-@WebServlet(name = "CurrenciesServlet", urlPatterns = "/currencies/*")
+@WebServlet(name = "CurrenciesServlet", urlPatterns = {"/currencies", "/currency/*"})
 public class CurrenciesServlet extends HttpServlet{
     private CurrenciesService currenciesService;
     private Gson gson;
