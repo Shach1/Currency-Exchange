@@ -3,6 +3,7 @@ package ru.trukhmanov.service;
 import ru.trukhmanov.exception.ExchangeRateCannotBeCalculated;
 import ru.trukhmanov.exception.ExchangeRateNotFound;
 import ru.trukhmanov.exception.InvalidRequestFormat;
+import ru.trukhmanov.exception.InvalidValue;
 import ru.trukhmanov.model.entity.ExchangeRate;
 import ru.trukhmanov.service.dto.request.ExchangeRequest;
 import ru.trukhmanov.service.dto.response.ExchangeResponse;
@@ -20,6 +21,7 @@ public class ExchangeService{
         if(request.baseCurrencyCode() == null || request.baseCurrencyCode().isEmpty() ||
                 request.targetCurrencyCode() == null || request.targetCurrencyCode().isEmpty() ||
                 request.amount() == null || request.amount().isEmpty()) throw new InvalidRequestFormat();
+        if(request.baseCurrencyCode().equals(request.targetCurrencyCode())) throw new InvalidValue("Base and target currencies must be different");
         var amount = Parser.parseBigDecimal(request.amount());
         var baseCurrency = currenciesService.getCurrencyByCode(request.baseCurrencyCode());
         var targetCurrency = currenciesService.getCurrencyByCode(request.targetCurrencyCode());
@@ -29,9 +31,9 @@ public class ExchangeService{
         return new ExchangeResponse(
                 baseCurrency,
                 targetCurrency,
-                rate,
+                rate.setScale(ExchangeRatesService.SCALE, ExchangeRatesService.ROUNDING_MODE),
                 amount,
-                convertedAmount);
+                convertedAmount.setScale(ExchangeRatesService.SCALE, ExchangeRatesService.ROUNDING_MODE));
     }
 
     private BigDecimal getRate(Integer baseCurrencyId, Integer targetCurrencyId){
@@ -41,10 +43,7 @@ public class ExchangeService{
         rate = getReversedRate(baseCurrencyId, targetCurrencyId);
         if(rate.isPresent()) return rate.get();
 
-        rate = getRateByUsd(baseCurrencyId, targetCurrencyId);
-        if(rate.isPresent()) return rate.get();
-
-        throw new ExchangeRateCannotBeCalculated();
+        return getRateByGeneralCurrency(baseCurrencyId, targetCurrencyId);
     }
 
     private Optional<BigDecimal> getDirectRate(Integer baseCurrencyId, Integer targetCurrencyId){
@@ -71,8 +70,17 @@ public class ExchangeService{
         return Optional.empty();
     }
 
-    private Optional<BigDecimal> getRateByUsd(Integer baseCurrencyId, Integer targetCurrencyId){
-        //todo: добавить возможность конвертации через USD (USD-A USD-B)
-        return Optional.empty();
+    private BigDecimal getRateByGeneralCurrency(Integer baseCurrencyId, Integer targetCurrencyId){
+        var generalCurrency = currenciesService.getGeneralCurrency();
+
+        Optional<BigDecimal> baseToGeneralRate = getDirectRate(baseCurrencyId, generalCurrency.id());
+        if(baseToGeneralRate.isEmpty()) baseToGeneralRate = getReversedRate( baseCurrencyId, generalCurrency.id());
+        if(baseToGeneralRate.isEmpty()) throw new ExchangeRateCannotBeCalculated();
+
+        Optional<BigDecimal> generalToTargetRate = getDirectRate(generalCurrency.id(), targetCurrencyId);
+        if(generalToTargetRate.isEmpty()) generalToTargetRate = getReversedRate(generalCurrency.id(), targetCurrencyId);
+        if(generalToTargetRate.isEmpty()) throw new ExchangeRateCannotBeCalculated();
+
+        return baseToGeneralRate.get().multiply(generalToTargetRate.get());
     }
 }

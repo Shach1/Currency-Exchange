@@ -13,6 +13,14 @@ import java.util.List;
 
 public class CurrenciesService{
     private final CurrenciesDao currenciesDao = new CurrenciesDao();
+    private final Currency cacheGeneralCurrency;
+
+    public CurrenciesService(){
+        String generalCurrencyCode = "USD";
+        var currency = currenciesDao.findByCode(generalCurrencyCode);
+        if(currency.isEmpty()) throw new UnsuspectedException("Unable to obtain general currency with code: %s".formatted(generalCurrencyCode));
+        cacheGeneralCurrency = currency.get();
+    }
 
     public List<CurrencyResponse> getAllCurrencies(){
         return currenciesDao.getAll().stream()
@@ -96,5 +104,9 @@ public class CurrenciesService{
         Integer id = Parser.parseInteger(request.id());
         var currency = parseCreateCurrencyRequest(new CreateCurrencyRequest(request.code(), request.name(), request.sign()));
         return new Currency(id, currency.code(), currency.fullName(), currency.sign());
+    }
+
+    protected Currency getGeneralCurrency(){
+        return cacheGeneralCurrency;
     }
 }
