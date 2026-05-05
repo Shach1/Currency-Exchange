@@ -98,7 +98,7 @@ public class ExchangeRatesService{
     }
 
     public ExchangeRateResponse updateExchangeRate(UpdateExchangeRateRequest request){
-        if(request.rate() == null) throw new InvalidRequestFormat();
+        if(request.rate() == null) throw new InvalidRequestFormat("rate cannot be null");
         var exchangeRate = getExchangeRateByCodePair(request.codePair());
         ratesDao.updateRate(getValidatedExchangeRate(new ExchangeRate(
                 exchangeRate.id(),
