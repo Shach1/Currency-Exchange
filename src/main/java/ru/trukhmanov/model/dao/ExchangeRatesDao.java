@@ -1,6 +1,7 @@
 package ru.trukhmanov.model.dao;
 
 import ru.trukhmanov.exception.DatabaseException;
+import ru.trukhmanov.exception.UnsuspectedException;
 import ru.trukhmanov.model.entity.ExchangeRate;
 import ru.trukhmanov.util.DbHelper;
 
@@ -25,7 +26,7 @@ public class ExchangeRatesDao{
             statement.executeUpdate();
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new DatabaseException();
+            throw new DatabaseException("Insert failed");
         }
     }
 
@@ -39,7 +40,7 @@ public class ExchangeRatesDao{
             return mapResultSetToList(resultSet);
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new DatabaseException();
+            throw new UnsuspectedException("Unsuspected database problem");
         }
     }
 
@@ -55,7 +56,7 @@ public class ExchangeRatesDao{
             }
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new DatabaseException();
+            throw new UnsuspectedException("Unsuspected database problem");
         }
         return list;
     }
@@ -72,7 +73,7 @@ public class ExchangeRatesDao{
             return Optional.of(result.getFirst());
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new DatabaseException();
+            throw new UnsuspectedException("Unsuspected database problem");
         }
     }
 
@@ -92,7 +93,7 @@ public class ExchangeRatesDao{
             return Optional.of(result.getFirst());
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new DatabaseException();
+            throw new UnsuspectedException("Unsuspected database problem");
         }
     }
 
@@ -111,7 +112,7 @@ public class ExchangeRatesDao{
             statement.executeUpdate();
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new DatabaseException();
+            throw new DatabaseException("Update failed");
         }
     }
 }
