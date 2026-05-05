@@ -93,7 +93,7 @@ public class ExchangeRatesService{
                 null,
                 er.baseCurrencyId(),
                 er.targetCurrencyId(),
-                er.rate().setScale(6, RoundingMode.DOWN)
+                er.rate().setScale(SCALE, RoundingMode.DOWN)
         );
     }
 

@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 public class ExchangeService{
+    public static final Integer SCALE = 2;
     private final ExchangeRatesService ratesService = new ExchangeRatesService();
     private final CurrenciesService currenciesService = new CurrenciesService();
 
@@ -31,9 +32,9 @@ public class ExchangeService{
         return new ExchangeResponse(
                 baseCurrency,
                 targetCurrency,
-                rate.setScale(ExchangeRatesService.SCALE, ExchangeRatesService.ROUNDING_MODE),
+                rate.setScale(SCALE, ExchangeRatesService.ROUNDING_MODE),
                 amount,
-                convertedAmount.setScale(ExchangeRatesService.SCALE, ExchangeRatesService.ROUNDING_MODE));
+                convertedAmount.setScale(SCALE, ExchangeRatesService.ROUNDING_MODE));
     }
 
     private BigDecimal getRate(Integer baseCurrencyId, Integer targetCurrencyId){
