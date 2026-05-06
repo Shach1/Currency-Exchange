@@ -26,7 +26,7 @@ public class ExchangeRatesDao{
             statement.executeUpdate();
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new DatabaseException("Insert failed");
+            throw new DatabaseException("Insert failed with massage: " + e.getMessage());
         }
     }
 
@@ -112,7 +112,7 @@ public class ExchangeRatesDao{
             statement.executeUpdate();
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new DatabaseException("Update failed");
+            throw new DatabaseException("Update failed with massage: " + e.getMessage());
         }
     }
 }

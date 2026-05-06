@@ -12,6 +12,10 @@ import ru.trukhmanov.util.Patterns;
 import java.util.List;
 
 public class CurrenciesService{
+    public static final int CODE_LENGTH = 3;
+    public static final int NAME_MIN_LENGTH = 3;
+    public static final int NAME_MAX_LENGTH = 20;
+    public static final int SIGN_MAX_LENGTH = 4;
     private final CurrenciesDao currenciesDao = new CurrenciesDao();
     private final Currency cacheGeneralCurrency;
 
@@ -37,7 +41,7 @@ public class CurrenciesService{
     }
 
     public CurrencyResponse getCurrencyByCode(String code){
-        if(code == null || code.length() != 3) throw new InvalidRequestFormat();
+        if(code == null || code.length() != CODE_LENGTH) throw new InvalidRequestFormat();
         var result = currenciesDao.findByCode(code);
         if(result.isEmpty()) throw new CurrencyNotFound("Currency with code: %s not found".formatted(code));
         return mapToCurrencyDto(result.get());
@@ -45,7 +49,7 @@ public class CurrenciesService{
 
     public CurrencyResponse getCurrencyById(Integer id){
         var result = currenciesDao.findById(id);
-        if(result.isEmpty()) throw new CurrencyNotFound();
+        if(result.isEmpty()) throw new CurrencyNotFound("Currency with id: %d not found".formatted(id));
         return mapToCurrencyDto(result.get());
     }
 
@@ -74,19 +78,19 @@ public class CurrenciesService{
 
     private void validateCurrency(Currency currency){
         if(currency.code() == null) throw new InvalidValue("Code cannot be null");
-        if(currency.code().length() != 3) throw new InvalidValue("Code length must be equal 3");
+        if(currency.code().length() != CODE_LENGTH) throw new InvalidValue("Code length must be equal %d".formatted(CODE_LENGTH));
         if(!Patterns.ENG_LETTERS.matcher(currency.code()).matches())
             throw new InvalidValue("Code must consist entirely of letters");
 
         if(currency.fullName() == null) throw new InvalidValue("Full name cannot be null");
-        if(currency.fullName().length() < 3 || currency.fullName().length() > 20)
-            throw new InvalidValue("Full name length cannot be less than 3 and more than 20");
+        if(currency.fullName().length() < NAME_MIN_LENGTH || currency.fullName().length() > NAME_MAX_LENGTH)
+            throw new InvalidValue("Full name length cannot be less than %d and more than %d".formatted(NAME_MIN_LENGTH, NAME_MAX_LENGTH));
         if(!Patterns.ENG_LETTERS_AND_SPACES_BETWEEN_WORDS.matcher(currency.fullName()).matches())
             throw new InvalidValue("Full name can contain only letters and spaces between words");
 
         if(currency.sign() == null) throw new InvalidValue("Sign cannot be null");
-        if(currency.sign().isEmpty() || currency.sign().length() > 4)
-            throw new InvalidValue("Sign length cannot be less than 1 and more than 4");
+        if(currency.sign().isEmpty() || currency.sign().length() > SIGN_MAX_LENGTH)
+            throw new InvalidValue("Sign length cannot be less than 1 and more than %d".formatted(SIGN_MAX_LENGTH));
     }
 
     public CurrencyResponse updateCurrency(UpdateCurrencyRequest request){

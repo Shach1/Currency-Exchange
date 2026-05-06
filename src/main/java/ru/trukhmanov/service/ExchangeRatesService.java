@@ -36,9 +36,9 @@ public class ExchangeRatesService{
     }
 
     private ExchangeRate getExchangeRateByCodePair(String codePair){
-        if(codePair.length() != 6) throw new InvalidRequestFormat();
-        String baseCurrencyCode = codePair.substring(0, 3);
-        String targetCurrencyCode = codePair.substring(3, 6);
+        if(codePair.length() != CurrenciesService.CODE_LENGTH * 2) throw new InvalidRequestFormat();
+        String baseCurrencyCode = codePair.substring(0, CurrenciesService.CODE_LENGTH);
+        String targetCurrencyCode = codePair.substring(CurrenciesService.CODE_LENGTH, CurrenciesService.CODE_LENGTH * 2);
 
         try{
             var currency1 = currenciesService.getCurrencyByCode(baseCurrencyCode);
@@ -88,7 +88,7 @@ public class ExchangeRatesService{
             throw new InvalidValue("Base and target currency identifiers cannot be equal");
 
         if(er.rate() == null) throw new InvalidValue("Rate cannot be null");
-        if(er.rate().equals(BigDecimal.ZERO)) throw new InvalidValue("Exchange rate cannot be 0");
+        if(er.rate().compareTo(BigDecimal.ZERO) < 1) throw new InvalidValue("Exchange rate cannot be less than 0");
         return new ExchangeRate(
                 null,
                 er.baseCurrencyId(),
@@ -98,7 +98,7 @@ public class ExchangeRatesService{
     }
 
     public ExchangeRateResponse updateExchangeRate(UpdateExchangeRateRequest request){
-        if(request.rate() == null) throw new InvalidRequestFormat("rate cannot be null");
+        if(request.rate() == null) throw new InvalidRequestFormat("Rate cannot be null");
         var exchangeRate = getExchangeRateByCodePair(request.codePair());
         ratesDao.updateRate(getValidatedExchangeRate(new ExchangeRate(
                 exchangeRate.id(),

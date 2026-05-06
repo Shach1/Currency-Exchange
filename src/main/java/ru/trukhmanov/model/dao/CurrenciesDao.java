@@ -26,7 +26,7 @@ public class CurrenciesDao{
             statement.executeUpdate();
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new DatabaseException("Insert failed");
+            throw new DatabaseException("Insert failed with massage: " + e.getMessage());
         }
     }
 
@@ -111,8 +111,7 @@ public class CurrenciesDao{
             statement.setInt(4, currency.id());
             statement.executeUpdate();
         } catch (SQLException e){
-            System.out.println(e.getMessage());
-            throw new DatabaseException("Update failed");
+            throw new DatabaseException("Update failed with massage: " + e.getMessage());
         }
     }
 }
