@@ -5,6 +5,9 @@ build/
 !**/src/test/**/build/
 .kotlin
 build.sh
+deploy.sh
+run.sh
+stop.sh
 
 ### IntelliJ IDEA ###
 .idea/

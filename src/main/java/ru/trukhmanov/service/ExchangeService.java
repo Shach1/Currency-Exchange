@@ -19,9 +19,9 @@ public class ExchangeService{
 
 
     public ExchangeResponse calculateExchange(ExchangeRequest request){
-        if(request.baseCurrencyCode() == null || request.baseCurrencyCode().isEmpty() ||
-                request.targetCurrencyCode() == null || request.targetCurrencyCode().isEmpty() ||
-                request.amount() == null || request.amount().isEmpty()) throw new InvalidRequestFormat();
+        if(request.baseCurrencyCode() == null || request.baseCurrencyCode().isBlank() ||
+                request.targetCurrencyCode() == null || request.targetCurrencyCode().isBlank() ||
+                request.amount() == null || request.amount().isBlank()) throw new InvalidRequestFormat();
         if(request.baseCurrencyCode().equals(request.targetCurrencyCode())) throw new InvalidValue("Base and target currencies must be different");
         var amount = Parser.parseBigDecimal(request.amount());
         var baseCurrency = currenciesService.getCurrencyByCode(request.baseCurrencyCode());
@@ -32,7 +32,7 @@ public class ExchangeService{
         return new ExchangeResponse(
                 baseCurrency,
                 targetCurrency,
-                rate.setScale(SCALE, ExchangeRatesService.ROUNDING_MODE),
+                rate,
                 amount,
                 convertedAmount.setScale(SCALE, ExchangeRatesService.ROUNDING_MODE));
     }

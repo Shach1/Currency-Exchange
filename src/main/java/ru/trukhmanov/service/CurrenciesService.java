@@ -13,7 +13,7 @@ public class CurrenciesService{
     public static final int CODE_LENGTH = 3;
     public static final int NAME_MIN_LENGTH = 3;
     public static final int NAME_MAX_LENGTH = 20;
-    public static final int SIGN_MAX_LENGTH = 4;
+    public static final int SIGN_MAX_LENGTH = 3;
     private final CurrenciesDao currenciesDao = new CurrenciesDao();
     private final Currency cacheGeneralCurrency;
 
@@ -60,11 +60,11 @@ public class CurrenciesService{
     }
 
     private Currency parseCreateCurrencyRequest(CreateCurrencyRequest request){
-        if(request.name() == null || request.name().isEmpty())
+        if(request.name() == null || request.name().isBlank())
             throw new MissingFormField("%s form field is missing".formatted("name"));
-        if(request.code() == null || request.code().isEmpty())
+        if(request.code() == null || request.code().isBlank())
             throw new MissingFormField("%s form field is missing".formatted("code"));
-        if(request.sign() == null || request.sign().isEmpty())
+        if(request.sign() == null || request.sign().isBlank())
             throw new MissingFormField("%s form field is missing".formatted("sign"));
         var currency = new Currency(null, request.code().toUpperCase(), request.name(), request.sign());
         validateCurrency(currency);
@@ -84,7 +84,7 @@ public class CurrenciesService{
             throw new InvalidValue("Full name can contain only letters and spaces between words");
 
         if(currency.sign() == null) throw new InvalidValue("Sign cannot be null");
-        if(currency.sign().isEmpty() || currency.sign().length() > SIGN_MAX_LENGTH)
+        if(currency.sign().isBlank() || currency.sign().length() > SIGN_MAX_LENGTH)
             throw new InvalidValue("Sign length cannot be less than 1 and more than %d".formatted(SIGN_MAX_LENGTH));
     }
 

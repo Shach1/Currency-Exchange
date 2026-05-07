@@ -28,7 +28,7 @@ public class CurrenciesDao{
             statement.executeUpdate();
         } catch (SQLException e){
             if(e.getErrorCode() == SQLiteErrorCode.SQLITE_CONSTRAINT.code){
-                throw new EntityAlreadyExist("A currency with this values already exists. All values must be UNIQUE");
+                throw new EntityAlreadyExist("A currency with this code already exists");
             }
             System.out.println(e.getMessage());
             throw new DatabaseException("Insert failed");

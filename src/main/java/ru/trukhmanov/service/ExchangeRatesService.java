@@ -64,13 +64,13 @@ public class ExchangeRatesService{
     }
 
     private ExchangeRate parseCreateExchangeRateRequest(CreateExchangeRateRequest request){
-        if(request.baseCurrencyCode() == null || request.baseCurrencyCode().isEmpty()) {
+        if(request.baseCurrencyCode() == null || request.baseCurrencyCode().isBlank()) {
             throw new MissingFormField("%s form field is missing".formatted("baseCurrencyCode"));
         }
-        if(request.targetCurrencyCode() == null || request.targetCurrencyCode().isEmpty()){
+        if(request.targetCurrencyCode() == null || request.targetCurrencyCode().isBlank()){
             throw new MissingFormField("%s form field is missing".formatted("targetCurrencyCode"));
         }
-        if(request.rate() == null || request.rate().isEmpty()){
+        if(request.rate() == null || request.rate().isBlank()){
             throw new MissingFormField("%s form field is missing".formatted("rate"));
         }
         var rateDecimal = Parser.parseBigDecimal(request.rate());
