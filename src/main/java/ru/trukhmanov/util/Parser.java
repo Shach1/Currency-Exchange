@@ -9,7 +9,7 @@ public class Parser{
         try{
             return new BigDecimal(bigDecimal);
         } catch (RuntimeException ignore){
-            throw new InvalidValue();
+            throw new InvalidValue("Invalid value: %s".formatted(bigDecimal));
         }
     }
 
@@ -17,7 +17,7 @@ public class Parser{
         try{
             return Integer.valueOf(integer);
         } catch (RuntimeException ignore){
-            throw new InvalidValue();
+            throw new InvalidValue("Invalid value: %s".formatted(integer));
         }
     }
 }

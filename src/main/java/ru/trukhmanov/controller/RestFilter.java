@@ -11,7 +11,11 @@ import ru.trukhmanov.service.dto.response.ErrorMessage;
 
 import java.io.IOException;
 
-@WebFilter(filterName = "RestServlet", servletNames = {"CurrenciesServlet", "ExchangeRatesServlet", "ExchangeServlet"})
+@WebFilter(filterName = "RestServlet",
+        servletNames = {
+                "CurrenciesServlet",
+                "ExchangeRatesServlet",
+                "ExchangeServlet"})
 public class RestFilter extends HttpFilter{
     Gson gson = new Gson();
 
@@ -22,13 +26,13 @@ public class RestFilter extends HttpFilter{
         res.setCharacterEncoding("UTF-8");
         try{
             super.doFilter(req, res, chain);
-        } catch (InvalidRequestFormat | InvalidValue | MissingFormField | IllegalArgumentException e){
+        } catch (InvalidRequestFormat | InvalidValue | MissingFormField e){
             res.setStatus(400);
             out.println(gson.toJson(new ErrorMessage(e.getMessage())));
         } catch (CurrencyNotFound | ExchangeRateNotFound | ExchangeRateCannotBeCalculated e){
             res.setStatus(404);
             out.println(gson.toJson(new ErrorMessage(e.getMessage())));
-        } catch (CurrencyAlreadyExist | ExchangeRateAlreadyExist e){
+        } catch (EntityAlreadyExist e){
             res.setStatus(409);
             out.println(gson.toJson(new ErrorMessage(e.getMessage())));
         } catch (DatabaseException | UnsuspectedException e){

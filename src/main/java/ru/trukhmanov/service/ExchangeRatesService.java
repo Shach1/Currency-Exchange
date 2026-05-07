@@ -57,9 +57,6 @@ public class ExchangeRatesService{
 
     public ExchangeRateResponse createExchangeRate(CreateExchangeRateRequest request){
         ExchangeRate exchangeRate = parseCreateExchangeRateRequest(request);
-
-        if(ratesDao.findByCurrenciesId(exchangeRate.baseCurrencyId(), exchangeRate.targetCurrencyId()).isPresent())
-            throw new ExchangeRateAlreadyExist();
         ratesDao.insert(exchangeRate);
         var newExchangeRate = ratesDao.findByCurrenciesId(exchangeRate.baseCurrencyId(), exchangeRate.targetCurrencyId());
         if(newExchangeRate.isEmpty()) throw new UnsuspectedException();
@@ -67,10 +64,14 @@ public class ExchangeRatesService{
     }
 
     private ExchangeRate parseCreateExchangeRateRequest(CreateExchangeRateRequest request){
-        if(request.baseCurrencyCode() == null || request.baseCurrencyCode().isEmpty() ||
-                request.targetCurrencyCode() == null || request.targetCurrencyCode().isEmpty() ||
-                request.rate() == null || request.rate().isEmpty()){
-            throw new MissingFormField();
+        if(request.baseCurrencyCode() == null || request.baseCurrencyCode().isEmpty()) {
+            throw new MissingFormField("%s form field is missing".formatted("baseCurrencyCode"));
+        }
+        if(request.targetCurrencyCode() == null || request.targetCurrencyCode().isEmpty()){
+            throw new MissingFormField("%s form field is missing".formatted("targetCurrencyCode"));
+        }
+        if(request.rate() == null || request.rate().isEmpty()){
+            throw new MissingFormField("%s form field is missing".formatted("rate"));
         }
         var rateDecimal = Parser.parseBigDecimal(request.rate());
         var currency1 = currenciesService.getCurrencyByCode(request.baseCurrencyCode());

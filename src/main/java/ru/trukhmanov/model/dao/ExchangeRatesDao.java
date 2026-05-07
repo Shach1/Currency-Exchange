@@ -1,9 +1,11 @@
 package ru.trukhmanov.model.dao;
 
+import org.sqlite.SQLiteErrorCode;
 import ru.trukhmanov.exception.DatabaseException;
+import ru.trukhmanov.exception.EntityAlreadyExist;
 import ru.trukhmanov.exception.UnsuspectedException;
 import ru.trukhmanov.model.entity.ExchangeRate;
-import ru.trukhmanov.util.DbHelper;
+import ru.trukhmanov.util.DbManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,7 +19,7 @@ public class ExchangeRatesDao{
                 INSERT INTO `exchange_rates`(base_currency_id, target_currency_id, rate)
                 VALUES(?, ?, ?)
                 """;
-        try(var connection = DbHelper.getConnection();
+        try(var connection = DbManager.getConnection();
             var statement = connection.prepareStatement(sqlInsert)
         ){
             statement.setInt(1, exchangeRate.baseCurrencyId());
@@ -25,15 +27,18 @@ public class ExchangeRatesDao{
             statement.setBigDecimal(3, exchangeRate.rate());
             statement.executeUpdate();
         } catch (SQLException e){
+            if(e.getErrorCode() == SQLiteErrorCode.SQLITE_CONSTRAINT.code){
+                throw new EntityAlreadyExist("A currency pair with this code already exists");
+            }
             System.out.println(e.getMessage());
-            throw new DatabaseException("Insert failed with massage: " + e.getMessage());
+            throw new DatabaseException("Insert failed");
         }
     }
 
     public List<ExchangeRate> getAll(){
         String sqlSelect = "SELECT * from `exchange_rates`";
 
-        try(var connection = DbHelper.getConnection();
+        try(var connection = DbManager.getConnection();
             var statement = connection.prepareStatement(sqlSelect)
         ){
             ResultSet resultSet = statement.executeQuery();
@@ -63,7 +68,7 @@ public class ExchangeRatesDao{
 
     public Optional<ExchangeRate> findById(Integer id){
         String sqlFind = "SELECT * FROM `exchange_rates` WHERE id = ?";
-        try(var connection = DbHelper.getConnection();
+        try(var connection = DbManager.getConnection();
             var statement = connection.prepareStatement(sqlFind)
         ){
             statement.setInt(1, id);
@@ -82,7 +87,7 @@ public class ExchangeRatesDao{
         SELECT * FROM `exchange_rates`
         WHERE base_currency_id = ? AND target_currency_id = ?
         """;
-        try(var connection = DbHelper.getConnection();
+        try(var connection = DbManager.getConnection();
             var statement = connection.prepareStatement(sqlFind)
         ){
             statement.setInt(1, baseCurrencyId);
@@ -103,7 +108,7 @@ public class ExchangeRatesDao{
                 SET rate = ?
                 WHERE base_currency_id = ? and target_currency_id = ?
                 """;
-        try(var connection = DbHelper.getConnection();
+        try(var connection = DbManager.getConnection();
             var statement = connection.prepareStatement(sqlUpdate)
         ){
             statement.setBigDecimal(1, exchangeRate.rate());

@@ -1,9 +1,11 @@
 package ru.trukhmanov.model.dao;
 
+import org.sqlite.SQLiteErrorCode;
 import ru.trukhmanov.exception.DatabaseException;
+import ru.trukhmanov.exception.EntityAlreadyExist;
 import ru.trukhmanov.exception.UnsuspectedException;
 import ru.trukhmanov.model.entity.Currency;
-import ru.trukhmanov.util.DbHelper;
+import ru.trukhmanov.util.DbManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,7 +19,7 @@ public class CurrenciesDao{
                 INSERT INTO `currencies`(code, full_name, sign)
                 VALUES(?, ?, ?)
                 """;
-        try(var connection = DbHelper.getConnection();
+        try(var connection = DbManager.getConnection();
             var statement = connection.prepareStatement(sqlInsert)
         ){
             statement.setString(1, currency.code());
@@ -25,15 +27,18 @@ public class CurrenciesDao{
             statement.setString(3, currency.sign());
             statement.executeUpdate();
         } catch (SQLException e){
+            if(e.getErrorCode() == SQLiteErrorCode.SQLITE_CONSTRAINT.code){
+                throw new EntityAlreadyExist("A currency with this values already exists. All values must be UNIQUE");
+            }
             System.out.println(e.getMessage());
-            throw new DatabaseException("Insert failed with massage: " + e.getMessage());
+            throw new DatabaseException("Insert failed");
         }
     }
 
     public List<Currency> getAll(){
         String sqlSelect = "SELECT * from `currencies`";
 
-        try(var connection = DbHelper.getConnection();
+        try(var connection = DbManager.getConnection();
             var statement = connection.prepareStatement(sqlSelect)
         ){
             ResultSet resultSet = statement.executeQuery();
@@ -45,7 +50,7 @@ public class CurrenciesDao{
 
     public Optional<Currency> findById(Integer id){
         String sqlFind = "SELECT * FROM `currencies` WHERE id = ?";
-        try(var connection = DbHelper.getConnection();
+        try(var connection = DbManager.getConnection();
             var statement = connection.prepareStatement(sqlFind)
         ){
             statement.setInt(1, id);
@@ -61,7 +66,7 @@ public class CurrenciesDao{
 
     public Optional<Currency> findByCode(String code){
         String sqlFind = "SELECT * FROM `currencies` WHERE code = ?";
-        try(var connection = DbHelper.getConnection();
+        try(var connection = DbManager.getConnection();
             var statement = connection.prepareStatement(sqlFind)
         ){
             statement.setString(1, code);
@@ -102,7 +107,7 @@ public class CurrenciesDao{
                  	sign = ?
                  WHERE id == ?
                 \s""";
-        try(var connection = DbHelper.getConnection();
+        try(var connection = DbManager.getConnection();
             var statement = connection.prepareStatement(sqlUpdate)
         ){
             statement.setString(1, currency.code());
@@ -111,7 +116,9 @@ public class CurrenciesDao{
             statement.setInt(4, currency.id());
             statement.executeUpdate();
         } catch (SQLException e){
-            throw new DatabaseException("Update failed with massage: " + e.getMessage());
+            System.out.println(e.getErrorCode());
+            System.out.println(e.getMessage());
+            throw new DatabaseException("Update failed");
         }
     }
 }

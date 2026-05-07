@@ -55,9 +55,6 @@ public class CurrenciesService{
 
     public CurrencyResponse createCurrency(CreateCurrencyRequest request){
         var currency = parseCreateCurrencyRequest(request);
-        if(currenciesDao.findByCode(currency.code()).isPresent()){
-            throw new CurrencyAlreadyExist("A currency with this code already exists");
-        }
         currenciesDao.insert(currency);
         var newCurrency = currenciesDao.findByCode(currency.code());
         if(newCurrency.isEmpty()) throw new UnsuspectedException();
@@ -71,7 +68,7 @@ public class CurrenciesService{
             throw new MissingFormField("%s form field is missing".formatted("code"));
         if(request.sign() == null || request.sign().isEmpty())
             throw new MissingFormField("%s form field is missing".formatted("sign"));
-        var currency = new Currency(null, request.code(), request.name(), request.sign());
+        var currency = new Currency(null, request.code().toUpperCase(), request.name(), request.sign());
         validateCurrency(currency);
         return currency;
     }
@@ -95,11 +92,9 @@ public class CurrenciesService{
 
     public CurrencyResponse updateCurrency(UpdateCurrencyRequest request){
         var currency = parseUpdateCurrencyRequest(request);
-        if(currenciesDao.findById(currency.id()).isEmpty())
-            throw new CurrencyNotFound("Currency with id: %s not found".formatted(request.id()));
         currenciesDao.update(currency);
         var updatedCurrency = currenciesDao.findById(currency.id());
-        if(updatedCurrency.isEmpty()) throw new UnsuspectedException();
+        if(updatedCurrency.isEmpty()) throw new CurrencyNotFound("Currency with id: %s not found".formatted(request.id()));
         return mapToCurrencyDto(updatedCurrency.get());
     }
 

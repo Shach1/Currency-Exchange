@@ -9,10 +9,10 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class DbHelper{
+public final class DbManager{
     private static final DataSource datasource;
 
-    private DbHelper(){
+    private DbManager(){
     }
 
     static{
