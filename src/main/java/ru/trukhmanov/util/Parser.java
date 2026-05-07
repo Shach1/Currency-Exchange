@@ -12,12 +12,4 @@ public class Parser{
             throw new InvalidValue("Invalid value: %s".formatted(bigDecimal));
         }
     }
-
-    public static Integer parseInteger(String integer){
-        try{
-            return Integer.valueOf(integer);
-        } catch (RuntimeException ignore){
-            throw new InvalidValue("Invalid value: %s".formatted(integer));
-        }
-    }
 }

@@ -4,9 +4,7 @@ import ru.trukhmanov.exception.*;
 import ru.trukhmanov.model.dao.CurrenciesDao;
 import ru.trukhmanov.model.entity.Currency;
 import ru.trukhmanov.service.dto.request.CreateCurrencyRequest;
-import ru.trukhmanov.service.dto.request.UpdateCurrencyRequest;
 import ru.trukhmanov.service.dto.response.CurrencyResponse;
-import ru.trukhmanov.util.Parser;
 import ru.trukhmanov.util.Patterns;
 
 import java.util.List;
@@ -88,21 +86,6 @@ public class CurrenciesService{
         if(currency.sign() == null) throw new InvalidValue("Sign cannot be null");
         if(currency.sign().isEmpty() || currency.sign().length() > SIGN_MAX_LENGTH)
             throw new InvalidValue("Sign length cannot be less than 1 and more than %d".formatted(SIGN_MAX_LENGTH));
-    }
-
-    public CurrencyResponse updateCurrency(UpdateCurrencyRequest request){
-        var currency = parseUpdateCurrencyRequest(request);
-        currenciesDao.update(currency);
-        var updatedCurrency = currenciesDao.findById(currency.id());
-        if(updatedCurrency.isEmpty()) throw new CurrencyNotFound("Currency with id: %s not found".formatted(request.id()));
-        return mapToCurrencyDto(updatedCurrency.get());
-    }
-
-    private Currency parseUpdateCurrencyRequest(UpdateCurrencyRequest request){
-        if(request.id() == null) throw new MissingFormField("%s form field is missing".formatted("id"));
-        Integer id = Parser.parseInteger(request.id());
-        var currency = parseCreateCurrencyRequest(new CreateCurrencyRequest(request.code(), request.name(), request.sign()));
-        return new Currency(id, currency.code(), currency.fullName(), currency.sign());
     }
 
     protected Currency getGeneralCurrency(){

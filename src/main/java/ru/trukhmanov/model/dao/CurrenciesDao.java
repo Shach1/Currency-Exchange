@@ -97,28 +97,4 @@ public class CurrenciesDao{
         }
         return list;
     }
-
-    public void update(Currency currency){
-        String sqlUpdate = """
-                 UPDATE `currencies`
-                 SET\s
-                 	code = ?,
-                 	full_name = ?,
-                 	sign = ?
-                 WHERE id == ?
-                \s""";
-        try(var connection = DbManager.getConnection();
-            var statement = connection.prepareStatement(sqlUpdate)
-        ){
-            statement.setString(1, currency.code());
-            statement.setString(2, currency.fullName());
-            statement.setString(3, currency.sign());
-            statement.setInt(4, currency.id());
-            statement.executeUpdate();
-        } catch (SQLException e){
-            System.out.println(e.getErrorCode());
-            System.out.println(e.getMessage());
-            throw new DatabaseException("Update failed");
-        }
-    }
 }

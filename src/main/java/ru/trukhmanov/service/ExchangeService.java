@@ -42,9 +42,7 @@ public class ExchangeService{
         if(rate.isPresent()) return rate.get();
 
         rate = getReversedRate(baseCurrencyId, targetCurrencyId);
-        if(rate.isPresent()) return rate.get();
-
-        return getRateByGeneralCurrency(baseCurrencyId, targetCurrencyId);
+        return rate.orElseGet(() -> getRateByGeneralCurrency(baseCurrencyId, targetCurrencyId));
     }
 
     private Optional<BigDecimal> getDirectRate(Integer baseCurrencyId, Integer targetCurrencyId){

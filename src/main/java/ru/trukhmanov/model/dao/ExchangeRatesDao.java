@@ -66,22 +66,6 @@ public class ExchangeRatesDao{
         return list;
     }
 
-    public Optional<ExchangeRate> findById(Integer id){
-        String sqlFind = "SELECT * FROM `exchange_rates` WHERE id = ?";
-        try(var connection = DbManager.getConnection();
-            var statement = connection.prepareStatement(sqlFind)
-        ){
-            statement.setInt(1, id);
-            ResultSet resultSet = statement.executeQuery();
-            var result = mapResultSetToList(resultSet);
-            if(result.isEmpty()) return Optional.empty();
-            return Optional.of(result.getFirst());
-        } catch (SQLException e){
-            System.out.println(e.getMessage());
-            throw new UnsuspectedException("Unsuspected database problem");
-        }
-    }
-
     public Optional<ExchangeRate> findByCurrenciesId(Integer baseCurrencyId, Integer targetCurrencyId){
         String sqlFind = """
         SELECT * FROM `exchange_rates`
