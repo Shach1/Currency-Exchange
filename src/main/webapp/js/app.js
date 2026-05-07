@@ -1,10 +1,9 @@
 $(document).ready(function() {
-    const host = "http://localhost:8080"
 
     // Fetch the list of currencies and populate the select element
     function requestCurrencies() {
         $.ajax({
-            url: `${host}/currencies`,
+            url: `/currencies`,
             type: "GET",
             dataType: "json",
             success: function (data) {
@@ -66,7 +65,7 @@ $(document).ready(function() {
         e.preventDefault();
 
         $.ajax({
-            url: `${host}/currencies`,
+            url: `/currencies`,
             type: "POST",
             data: $("#add-currency").serialize(),
             success: function(data) {
@@ -86,7 +85,7 @@ $(document).ready(function() {
 
     function requestExchangeRates() {
         $.ajax({
-            url: `${host}/exchangeRates`,
+            url: `/exchangeRates`,
             type: "GET",
             dataType: "json",
             success: function(response) {
@@ -135,7 +134,7 @@ $(document).ready(function() {
 
         // send values to the server with a patch request
         $.ajax({
-            url: `${host}/exchangeRate/${pair}`,
+            url: `/exchangeRate/${pair}`,
             type: "PATCH",
             contentType : "application/x-www-form-urlencoded",
             data: `rate=${exchangeRate}`,
@@ -161,7 +160,7 @@ $(document).ready(function() {
         e.preventDefault();
 
         $.ajax({
-            url: `${host}/exchangeRates`,
+            url: `/exchangeRates`,
             type: "POST",
             data: $("#add-exchange-rate").serialize(),
             success: function(data) {
@@ -187,7 +186,7 @@ $(document).ready(function() {
         const amount = $("#convert-amount").val();
 
         $.ajax({
-            url: `${host}/exchange?from=${baseCurrency}&to=${targetCurrency}&amount=${amount}`,
+            url: `/exchange?from=${baseCurrency}&to=${targetCurrency}&amount=${amount}`,
             type: "GET",
             // data: "$("#add-exchange-rate").serialize()",
             success: function(data) {
