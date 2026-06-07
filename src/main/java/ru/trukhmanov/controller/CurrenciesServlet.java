@@ -7,8 +7,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.trukhmanov.service.dto.request.CreateCurrencyRequest;
 import ru.trukhmanov.service.CurrenciesService;
+import ru.trukhmanov.service.dto.request.CreateCurrencyRequest;
 
 import java.io.IOException;
 
@@ -20,8 +20,8 @@ public class CurrenciesServlet extends HttpServlet{
     @Override
     public void init(ServletConfig config) throws ServletException{
         super.init(config);
-        currenciesService = new CurrenciesService();
-        gson = new Gson();
+        currenciesService = (CurrenciesService) getServletContext().getAttribute("currenciesService");
+        gson = (Gson) getServletContext().getAttribute("gson");
     }
 
     @Override

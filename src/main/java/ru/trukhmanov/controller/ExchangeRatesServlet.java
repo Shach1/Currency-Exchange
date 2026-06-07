@@ -8,8 +8,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.trukhmanov.exception.InvalidRequestFormat;
-import ru.trukhmanov.service.dto.request.CreateExchangeRateRequest;
 import ru.trukhmanov.service.ExchangeRatesService;
+import ru.trukhmanov.service.dto.request.CreateExchangeRateRequest;
 import ru.trukhmanov.service.dto.request.UpdateExchangeRateRequest;
 
 import java.io.IOException;
@@ -22,8 +22,8 @@ public class ExchangeRatesServlet extends HttpServlet{
     @Override
     public void init(ServletConfig config) throws ServletException{
         super.init(config);
-        ratesService = new ExchangeRatesService();
-        gson = new Gson();
+        ratesService = (ExchangeRatesService) getServletContext().getAttribute("exchangeRatesService");
+        gson = (Gson) getServletContext().getAttribute("gson");
     }
 
     @Override
