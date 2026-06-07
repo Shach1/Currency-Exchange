@@ -7,15 +7,15 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import ru.trukhmanov.exception.InvalidRequestFormat;
 import ru.trukhmanov.service.ExchangeRatesService;
-import ru.trukhmanov.service.dto.request.CreateExchangeRateRequest;
+import ru.trukhmanov.service.dto.request.UpdateExchangeRateRequest;
 import ru.trukhmanov.service.dto.response.ExchangeRateResponse;
 
 import java.io.IOException;
-import java.util.List;
 
-@WebServlet(name = "ExchangeRatesServlet", urlPatterns = "/exchangeRates")
-public class ExchangeRatesServlet extends HttpServlet{
+@WebServlet(name = "ExchangeRateServlet", urlPatterns = "/exchangeRate/*")
+public class ExchangeRateServlet extends HttpServlet{
     private ExchangeRatesService ratesService;
     private Gson gson;
 
@@ -29,22 +29,24 @@ public class ExchangeRatesServlet extends HttpServlet{
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException{
         var out = resp.getWriter();
-        List<ExchangeRateResponse> result = ratesService.getAllExchangeRates();
+        String codePair = req.getPathInfo().substring(1);
+
+        ExchangeRateResponse result = ratesService.getExchangeRate(codePair);
         resp.setStatus(200);
         out.println(gson.toJson(result));
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException{
+    protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException{
         var out = resp.getWriter();
 
-        String baseCurrencyCode = req.getParameter("baseCurrencyCode");
-        String targetCurrencyCode = req.getParameter("targetCurrencyCode");
+        if(req.getPathInfo() == null) throw new InvalidRequestFormat();
+        String codePair = req.getPathInfo().substring(1);
         String rate = req.getParameter("rate");
-        var request = new CreateExchangeRateRequest(baseCurrencyCode, targetCurrencyCode, rate);
+        var request = new UpdateExchangeRateRequest(codePair, rate);
 
-        ExchangeRateResponse result = ratesService.createExchangeRate(request);
-        resp.setStatus(201);
+        ExchangeRateResponse result = ratesService.updateExchangeRate(request);
+        resp.setStatus(200);
         out.println(gson.toJson(result));
     }
 }

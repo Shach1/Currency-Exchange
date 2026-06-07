@@ -1,7 +1,8 @@
-package ru.trukhmanov.controller;
+package ru.trukhmanov.filter;
 
 import com.google.gson.Gson;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,13 +12,21 @@ import ru.trukhmanov.service.dto.response.ErrorMessage;
 
 import java.io.IOException;
 
-@WebFilter(filterName = "RestServlet",
+@WebFilter(filterName = "ExceptionHandlingFilter",
         servletNames = {
                 "CurrenciesServlet",
+                "CurrencyServlet",
+                "ExchangeRateServlet",
                 "ExchangeRatesServlet",
                 "ExchangeServlet"})
-public class RestFilter extends HttpFilter{
-    Gson gson = new Gson();
+public class ExceptionHandlingFilter extends HttpFilter{
+    private Gson gson;
+
+    @Override
+    public void init() throws ServletException{
+        super.init();
+        gson = (Gson) getServletContext().getAttribute("gson");
+    }
 
     @Override
     protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException{

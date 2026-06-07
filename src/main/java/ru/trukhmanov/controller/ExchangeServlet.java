@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.trukhmanov.service.ExchangeService;
 import ru.trukhmanov.service.dto.request.ExchangeRequest;
+import ru.trukhmanov.service.dto.response.ExchangeResponse;
 
 import java.io.IOException;
 
@@ -28,11 +29,12 @@ public class ExchangeServlet extends HttpServlet{
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException{
         var out = resp.getWriter();
 
-        var baseCurrencyCode = req.getParameter("from");
-        var targetCurrencyCode = req.getParameter("to");
-        var amount = req.getParameter("amount");
+        String baseCurrencyCode = req.getParameter("from");
+        String targetCurrencyCode = req.getParameter("to");
+        String amount = req.getParameter("amount");
+        var request = new ExchangeRequest(baseCurrencyCode, targetCurrencyCode, amount);
 
-        var result = exchangeService.calculateExchange(new ExchangeRequest(baseCurrencyCode, targetCurrencyCode, amount));
+        ExchangeResponse result = exchangeService.calculateExchange(request);
         resp.setStatus(200);
         out.println(gson.toJson(result));
     }

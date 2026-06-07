@@ -19,7 +19,6 @@ public class AppContextListener implements ServletContextListener{
         CurrenciesDao currenciesDao = new CurrenciesDao();
         ExchangeRatesDao exchangeRatesDao = new ExchangeRatesDao();
 
-
         CurrenciesService currenciesService = new CurrenciesServiceImpl(currenciesDao);
         ExchangeRatesService exchangeRatesService = new ExchangeRatesServiceImpl(exchangeRatesDao, currenciesService);
         ExchangeService exchangeService = new ExchangeServiceImpl(exchangeRatesService, currenciesService);

@@ -8,14 +8,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.trukhmanov.service.CurrenciesService;
-import ru.trukhmanov.service.dto.request.CreateCurrencyRequest;
 import ru.trukhmanov.service.dto.response.CurrencyResponse;
 
 import java.io.IOException;
-import java.util.List;
 
-@WebServlet(name = "CurrenciesServlet", urlPatterns = "/currencies")
-public class CurrenciesServlet extends HttpServlet{
+@WebServlet(name = "CurrencyServlet", urlPatterns = "/currency/*")
+public class CurrencyServlet extends HttpServlet{
     private CurrenciesService currenciesService;
     private Gson gson;
 
@@ -29,22 +27,10 @@ public class CurrenciesServlet extends HttpServlet{
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException{
         var out = resp.getWriter();
-        List<CurrencyResponse> result = currenciesService.getAllCurrencies();
+        String pathVar = req.getPathInfo().substring(1);
+
+        CurrencyResponse result = currenciesService.getCurrencyByCode(pathVar);
         resp.setStatus(200);
-        out.println(gson.toJson(result));
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException{
-        var out = resp.getWriter();
-
-        String name = req.getParameter("name");
-        String code = req.getParameter("code");
-        String sign = req.getParameter("sign");
-        var request = new CreateCurrencyRequest(code, name, sign);
-
-        CurrencyResponse result = currenciesService.createCurrency(request);
-        resp.setStatus(201);
         out.println(gson.toJson(result));
     }
 }
