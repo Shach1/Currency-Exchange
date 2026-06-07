@@ -4,10 +4,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 .kotlin
-build.sh
-deploy.sh
-run.sh
-stop.sh
+scripts/
 
 ### IntelliJ IDEA ###
 .idea/
