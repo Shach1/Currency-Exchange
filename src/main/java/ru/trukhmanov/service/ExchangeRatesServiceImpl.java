@@ -40,22 +40,18 @@ public class ExchangeRatesServiceImpl implements ExchangeRatesService{
     }
 
     private ExchangeRate getExchangeRateByCodePair(String codePair){
-        if(codePair.length() != CurrenciesService.CODE_LENGTH * 2) throw new InvalidRequestFormat();
+        if(codePair.length() != CurrenciesService.CODE_LENGTH * 2) throw new ValidationException("Invalid request format");
         String baseCurrencyCode = codePair.substring(0, CurrenciesService.CODE_LENGTH);
         String targetCurrencyCode = codePair.substring(CurrenciesService.CODE_LENGTH, CurrenciesService.CODE_LENGTH * 2);
 
-        try{
-            var currency1 = currenciesService.getCurrencyByCode(baseCurrencyCode);
-            var currency2 = currenciesService.getCurrencyByCode(targetCurrencyCode);
-            return getExchangeRateByCurrenciesId(currency1.id(), currency2.id());
-        } catch (CurrencyNotFound e){
-            throw new ExchangeRateNotFound("Exchange rate not found for the pair");
-        }
+        var currency1 = currenciesService.getCurrencyByCode(baseCurrencyCode);
+        var currency2 = currenciesService.getCurrencyByCode(targetCurrencyCode);
+        return getExchangeRateByCurrenciesId(currency1.id(), currency2.id());
     }
 
     public ExchangeRate getExchangeRateByCurrenciesId(Integer baseCurrencyId, Integer targetCurrencyId){
         var result = ratesDao.findByCurrenciesId(baseCurrencyId, targetCurrencyId);
-        if(result.isEmpty()) throw new ExchangeRateNotFound("Exchange rate not found for the pair");
+        if(result.isEmpty()) throw new EntityNotFoundException("Exchange rate not found for the pair");
         return result.get();
     }
 
@@ -64,19 +60,19 @@ public class ExchangeRatesServiceImpl implements ExchangeRatesService{
         ExchangeRate exchangeRate = parseCreateExchangeRateRequest(request);
         ratesDao.insert(exchangeRate);
         var newExchangeRate = ratesDao.findByCurrenciesId(exchangeRate.baseCurrencyId(), exchangeRate.targetCurrencyId());
-        if(newExchangeRate.isEmpty()) throw new UnsuspectedException();
+        if(newExchangeRate.isEmpty()) throw new RuntimeException("Unsuspected problem");
         return mapToExchangeRateResponse(newExchangeRate.get());
     }
 
     private ExchangeRate parseCreateExchangeRateRequest(CreateExchangeRateRequest request){
         if(request.baseCurrencyCode() == null || request.baseCurrencyCode().isBlank()){
-            throw new MissingFormField("%s form field is missing".formatted("baseCurrencyCode"));
+            throw new ValidationException("%s form field is missing".formatted("baseCurrencyCode"));
         }
         if(request.targetCurrencyCode() == null || request.targetCurrencyCode().isBlank()){
-            throw new MissingFormField("%s form field is missing".formatted("targetCurrencyCode"));
+            throw new ValidationException("%s form field is missing".formatted("targetCurrencyCode"));
         }
         if(request.rate() == null || request.rate().isBlank()){
-            throw new MissingFormField("%s form field is missing".formatted("rate"));
+            throw new ValidationException("%s form field is missing".formatted("rate"));
         }
         var rateDecimal = Parser.parseBigDecimal(request.rate());
         var currency1 = currenciesService.getCurrencyByCode(request.baseCurrencyCode());
@@ -85,16 +81,16 @@ public class ExchangeRatesServiceImpl implements ExchangeRatesService{
     }
 
     private ExchangeRate getValidatedExchangeRate(ExchangeRate er){
-        if(er.baseCurrencyId() == null) throw new InvalidValue("Base currency id cannot be null");
-        if(er.baseCurrencyId() < 1) throw new InvalidValue("Base currency id cannot be less than 1");
+        if(er.baseCurrencyId() == null) throw new ValidationException("Base currency id cannot be null");
+        if(er.baseCurrencyId() < 1) throw new ValidationException("Base currency id cannot be less than 1");
 
-        if(er.targetCurrencyId() == null) throw new InvalidValue("Target currency id cannot be null");
-        if(er.targetCurrencyId() < 1) throw new InvalidValue("Target currency id cannot be less than 1");
+        if(er.targetCurrencyId() == null) throw new ValidationException("Target currency id cannot be null");
+        if(er.targetCurrencyId() < 1) throw new ValidationException("Target currency id cannot be less than 1");
         if(er.targetCurrencyId().equals(er.baseCurrencyId()))
-            throw new InvalidValue("Base and target currency identifiers cannot be equal");
+            throw new ValidationException("Base and target currency identifiers cannot be equal");
 
-        if(er.rate() == null) throw new InvalidValue("Rate cannot be null");
-        if(er.rate().compareTo(BigDecimal.ZERO) < 1) throw new InvalidValue("Exchange rate cannot be less than 0");
+        if(er.rate() == null) throw new ValidationException("Rate cannot be null");
+        if(er.rate().compareTo(BigDecimal.ZERO) < 1) throw new ValidationException("Exchange rate cannot be less than 0");
         return new ExchangeRate(
                 null,
                 er.baseCurrencyId(),
@@ -105,7 +101,7 @@ public class ExchangeRatesServiceImpl implements ExchangeRatesService{
 
     @Override
     public ExchangeRateResponse updateExchangeRate(UpdateExchangeRateRequest request){
-        if(request.rate() == null) throw new InvalidRequestFormat("Rate cannot be null");
+        if(request.rate() == null) throw new ValidationException("Rate cannot be null");
         var exchangeRate = getExchangeRateByCodePair(request.codePair());
         ratesDao.updateRate(getValidatedExchangeRate(new ExchangeRate(
                 exchangeRate.id(),

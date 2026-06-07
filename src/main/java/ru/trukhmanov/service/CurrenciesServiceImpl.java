@@ -17,7 +17,7 @@ public class CurrenciesServiceImpl implements CurrenciesService{
         this.currenciesDao = currenciesDao;
         String generalCurrencyCode = "USD";
         var currency = currenciesDao.findByCode(generalCurrencyCode);
-        if(currency.isEmpty()) throw new UnsuspectedException("Unable to obtain general currency with code: %s".formatted(generalCurrencyCode));
+        if(currency.isEmpty()) throw new RuntimeException("Unable to obtain general currency with code: %s".formatted(generalCurrencyCode));
         cacheGeneralCurrency = currency.get();
     }
 
@@ -39,16 +39,16 @@ public class CurrenciesServiceImpl implements CurrenciesService{
 
     @Override
     public CurrencyResponse getCurrencyByCode(String code){
-        if(code == null || code.length() != CODE_LENGTH) throw new InvalidRequestFormat();
+        if(code == null || code.length() != CODE_LENGTH) throw new ValidationException("Invalid request format");
         var result = currenciesDao.findByCode(code);
-        if(result.isEmpty()) throw new CurrencyNotFound("Currency with code: %s not found".formatted(code));
+        if(result.isEmpty()) throw new EntityNotFoundException("Currency with code: %s not found".formatted(code));
         return mapToCurrencyDto(result.get());
     }
 
     @Override
     public CurrencyResponse getCurrencyById(Integer id){
         var result = currenciesDao.findById(id);
-        if(result.isEmpty()) throw new CurrencyNotFound("Currency with id: %d not found".formatted(id));
+        if(result.isEmpty()) throw new EntityNotFoundException("Currency with id: %d not found".formatted(id));
         return mapToCurrencyDto(result.get());
     }
 
@@ -57,37 +57,37 @@ public class CurrenciesServiceImpl implements CurrenciesService{
         var currency = parseCreateCurrencyRequest(request);
         currenciesDao.insert(currency);
         var newCurrency = currenciesDao.findByCode(currency.code());
-        if(newCurrency.isEmpty()) throw new UnsuspectedException();
+        if(newCurrency.isEmpty()) throw new RuntimeException("Unsuspected problem");
         return mapToCurrencyDto(newCurrency.get());
     }
 
     private Currency parseCreateCurrencyRequest(CreateCurrencyRequest request){
         if(request.name() == null || request.name().isBlank())
-            throw new MissingFormField("%s form field is missing".formatted("name"));
+            throw new ValidationException("%s form field is missing".formatted("name"));
         if(request.code() == null || request.code().isBlank())
-            throw new MissingFormField("%s form field is missing".formatted("code"));
+            throw new ValidationException("%s form field is missing".formatted("code"));
         if(request.sign() == null || request.sign().isBlank())
-            throw new MissingFormField("%s form field is missing".formatted("sign"));
+            throw new ValidationException("%s form field is missing".formatted("sign"));
         var currency = new Currency(null, request.code().toUpperCase(), request.name(), request.sign());
         validateCurrency(currency);
         return currency;
     }
 
     private void validateCurrency(Currency currency){
-        if(currency.code() == null) throw new InvalidValue("Code cannot be null");
-        if(currency.code().length() != CODE_LENGTH) throw new InvalidValue("Code length must be equal %d".formatted(CODE_LENGTH));
+        if(currency.code() == null) throw new ValidationException("Code cannot be null");
+        if(currency.code().length() != CODE_LENGTH) throw new ValidationException("Code length must be equal %d".formatted(CODE_LENGTH));
         if(!Patterns.ENG_LETTERS.matcher(currency.code()).matches())
-            throw new InvalidValue("Code must consist entirely of letters");
+            throw new ValidationException("Code must consist entirely of English letters");
 
-        if(currency.fullName() == null) throw new InvalidValue("Full name cannot be null");
+        if(currency.fullName() == null) throw new ValidationException("Full name cannot be null");
         if(currency.fullName().length() < NAME_MIN_LENGTH || currency.fullName().length() > NAME_MAX_LENGTH)
-            throw new InvalidValue("Full name length cannot be less than %d and more than %d".formatted(NAME_MIN_LENGTH, NAME_MAX_LENGTH));
+            throw new ValidationException("Full name length cannot be less than %d and more than %d".formatted(NAME_MIN_LENGTH, NAME_MAX_LENGTH));
         if(!Patterns.ENG_LETTERS_AND_SPACES_BETWEEN_WORDS.matcher(currency.fullName()).matches())
-            throw new InvalidValue("Full name can contain only letters and spaces between words");
+            throw new ValidationException("Full name can contain only letters and spaces between words");
 
-        if(currency.sign() == null) throw new InvalidValue("Sign cannot be null");
+        if(currency.sign() == null) throw new ValidationException("Sign cannot be null");
         if(currency.sign().isBlank() || currency.sign().length() > SIGN_MAX_LENGTH)
-            throw new InvalidValue("Sign length cannot be less than 1 and more than %d".formatted(SIGN_MAX_LENGTH));
+            throw new ValidationException("Sign length cannot be less than 1 and more than %d".formatted(SIGN_MAX_LENGTH));
     }
 
     @Override

@@ -1,9 +1,7 @@
 package ru.trukhmanov.service;
 
-import ru.trukhmanov.exception.ExchangeRateCannotBeCalculated;
-import ru.trukhmanov.exception.ExchangeRateNotFound;
-import ru.trukhmanov.exception.InvalidRequestFormat;
-import ru.trukhmanov.exception.InvalidValue;
+import ru.trukhmanov.exception.EntityNotFoundException;
+import ru.trukhmanov.exception.ValidationException;
 import ru.trukhmanov.model.entity.ExchangeRate;
 import ru.trukhmanov.service.dto.request.ExchangeRequest;
 import ru.trukhmanov.service.dto.response.ExchangeResponse;
@@ -25,8 +23,8 @@ public class ExchangeServiceImpl implements ExchangeService{
     public ExchangeResponse calculateExchange(ExchangeRequest request){
         if(request.baseCurrencyCode() == null || request.baseCurrencyCode().isBlank() ||
                 request.targetCurrencyCode() == null || request.targetCurrencyCode().isBlank() ||
-                request.amount() == null || request.amount().isBlank()) throw new InvalidRequestFormat();
-        if(request.baseCurrencyCode().equals(request.targetCurrencyCode())) throw new InvalidValue("Base and target currencies must be different");
+                request.amount() == null || request.amount().isBlank()) throw new ValidationException("Invalid request format");
+        if(request.baseCurrencyCode().equals(request.targetCurrencyCode())) throw new ValidationException("Base and target currencies must be different");
         var amount = Parser.parseBigDecimal(request.amount());
         var baseCurrency = currenciesService.getCurrencyByCode(request.baseCurrencyCode());
         var targetCurrency = currenciesService.getCurrencyByCode(request.targetCurrencyCode());
@@ -53,7 +51,7 @@ public class ExchangeServiceImpl implements ExchangeService{
         ExchangeRate exchangeRate = null;
         try{
             exchangeRate = ratesService.getExchangeRateByCurrenciesId(baseCurrencyId, targetCurrencyId);
-        } catch (ExchangeRateNotFound ignore){}
+        } catch (EntityNotFoundException ignore){}
         if(exchangeRate != null) return Optional.of(exchangeRate.rate());
         return Optional.empty();
     }
@@ -62,7 +60,7 @@ public class ExchangeServiceImpl implements ExchangeService{
         ExchangeRate exchangeRate = null;
         try{
             exchangeRate = ratesService.getExchangeRateByCurrenciesId(targetCurrencyId, baseCurrencyId);
-        } catch (ExchangeRateNotFound ignore){}
+        } catch (EntityNotFoundException ignore){}
         if(exchangeRate != null){
             var reverseRate = BigDecimal.ONE.divide(
                     exchangeRate.rate(),
@@ -78,11 +76,11 @@ public class ExchangeServiceImpl implements ExchangeService{
 
         Optional<BigDecimal> baseToGeneralRate = getDirectRate(baseCurrencyId, generalCurrency.id());
         if(baseToGeneralRate.isEmpty()) baseToGeneralRate = getReversedRate( baseCurrencyId, generalCurrency.id());
-        if(baseToGeneralRate.isEmpty()) throw new ExchangeRateCannotBeCalculated();
+        if(baseToGeneralRate.isEmpty()) throw new EntityNotFoundException("Impossible to calculate the exchange rate for this currency pair");
 
         Optional<BigDecimal> generalToTargetRate = getDirectRate(generalCurrency.id(), targetCurrencyId);
         if(generalToTargetRate.isEmpty()) generalToTargetRate = getReversedRate(generalCurrency.id(), targetCurrencyId);
-        if(generalToTargetRate.isEmpty()) throw new ExchangeRateCannotBeCalculated();
+        if(generalToTargetRate.isEmpty()) throw new EntityNotFoundException("Impossible to calculate the exchange rate for this currency pair");
 
         return baseToGeneralRate.get().multiply(generalToTargetRate.get());
     }

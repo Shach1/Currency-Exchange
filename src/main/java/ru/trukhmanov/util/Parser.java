@@ -1,6 +1,6 @@
 package ru.trukhmanov.util;
 
-import ru.trukhmanov.exception.InvalidValue;
+import ru.trukhmanov.exception.ValidationException;
 
 import java.math.BigDecimal;
 
@@ -9,7 +9,7 @@ public class Parser{
         try{
             return new BigDecimal(bigDecimal);
         } catch (RuntimeException ignore){
-            throw new InvalidValue("Invalid value: %s".formatted(bigDecimal));
+            throw new ValidationException("Invalid value: %s".formatted(bigDecimal));
         }
     }
 }

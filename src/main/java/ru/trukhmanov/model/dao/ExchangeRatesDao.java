@@ -2,8 +2,7 @@ package ru.trukhmanov.model.dao;
 
 import org.sqlite.SQLiteErrorCode;
 import ru.trukhmanov.exception.DatabaseException;
-import ru.trukhmanov.exception.EntityAlreadyExist;
-import ru.trukhmanov.exception.UnsuspectedException;
+import ru.trukhmanov.exception.EntityAlreadyExistException;
 import ru.trukhmanov.model.entity.ExchangeRate;
 import ru.trukhmanov.util.DbManager;
 
@@ -28,7 +27,7 @@ public class ExchangeRatesDao{
             statement.executeUpdate();
         } catch (SQLException e){
             if(e.getErrorCode() == SQLiteErrorCode.SQLITE_CONSTRAINT.code){
-                throw new EntityAlreadyExist("A currency pair with this code already exists");
+                throw new EntityAlreadyExistException("A currency pair with this code already exists");
             }
             System.out.println(e.getMessage());
             throw new DatabaseException("Insert failed");
@@ -45,7 +44,7 @@ public class ExchangeRatesDao{
             return mapResultSetToList(resultSet);
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new UnsuspectedException("Unsuspected database problem");
+            throw new DatabaseException("Unsuspected database problem");
         }
     }
 
@@ -61,7 +60,7 @@ public class ExchangeRatesDao{
             }
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new UnsuspectedException("Unsuspected database problem");
+            throw new DatabaseException("Failed data conversion from database");
         }
         return list;
     }
@@ -82,7 +81,7 @@ public class ExchangeRatesDao{
             return Optional.of(result.getFirst());
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            throw new UnsuspectedException("Unsuspected database problem");
+            throw new DatabaseException("Unsuspected database problem");
         }
     }
 

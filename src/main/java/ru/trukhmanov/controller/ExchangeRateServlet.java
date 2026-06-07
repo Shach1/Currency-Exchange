@@ -7,7 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.trukhmanov.exception.InvalidRequestFormat;
+import ru.trukhmanov.exception.ValidationException;
 import ru.trukhmanov.service.ExchangeRatesService;
 import ru.trukhmanov.service.dto.request.UpdateExchangeRateRequest;
 import ru.trukhmanov.service.dto.response.ExchangeRateResponse;
@@ -40,7 +40,7 @@ public class ExchangeRateServlet extends HttpServlet{
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException{
         var out = resp.getWriter();
 
-        if(req.getPathInfo() == null) throw new InvalidRequestFormat();
+        if(req.getPathInfo() == null) throw new ValidationException("Invalid request format");
         String codePair = req.getPathInfo().substring(1);
         String rate = req.getParameter("rate");
         var request = new UpdateExchangeRateRequest(codePair, rate);

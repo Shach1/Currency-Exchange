@@ -35,16 +35,16 @@ public class ExceptionHandlingFilter extends HttpFilter{
         res.setCharacterEncoding("UTF-8");
         try{
             super.doFilter(req, res, chain);
-        } catch (InvalidRequestFormat | InvalidValue | MissingFormField e){
+        } catch (ValidationException e){
             res.setStatus(400);
             out.println(gson.toJson(new ErrorMessage(e.getMessage())));
-        } catch (CurrencyNotFound | ExchangeRateNotFound | ExchangeRateCannotBeCalculated e){
+        } catch (EntityNotFoundException e){
             res.setStatus(404);
             out.println(gson.toJson(new ErrorMessage(e.getMessage())));
-        } catch (EntityAlreadyExist e){
+        } catch (EntityAlreadyExistException e){
             res.setStatus(409);
             out.println(gson.toJson(new ErrorMessage(e.getMessage())));
-        } catch (DatabaseException | UnsuspectedException e){
+        } catch (DatabaseException e){
             res.setStatus(500);
             out.println(gson.toJson(new ErrorMessage(e.getMessage())));
         } catch (Exception e){
