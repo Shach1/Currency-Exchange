@@ -1,4 +1,4 @@
-package ru.trukhmanov.service.dto.request;
+package ru.trukhmanov.dto.request;
 
 public record UpdateExchangeRateRequest(
         String codePair,

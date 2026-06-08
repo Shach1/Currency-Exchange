@@ -1,7 +1,7 @@
 package ru.trukhmanov.service;
 
-import ru.trukhmanov.service.dto.request.ExchangeRequest;
-import ru.trukhmanov.service.dto.response.ExchangeResponse;
+import ru.trukhmanov.dto.request.ExchangeRequest;
+import ru.trukhmanov.dto.response.ExchangeResponse;
 
 public interface ExchangeService{
     Integer SCALE = 2;

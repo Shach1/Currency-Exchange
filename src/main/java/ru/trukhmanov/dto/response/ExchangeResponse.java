@@ -1,4 +1,4 @@
-package ru.trukhmanov.service.dto.response;
+package ru.trukhmanov.dto.response;
 
 import java.math.BigDecimal;
 

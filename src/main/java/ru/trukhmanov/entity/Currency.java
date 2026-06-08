@@ -1,4 +1,4 @@
-package ru.trukhmanov.model.entity;
+package ru.trukhmanov.entity;
 
 public record Currency(
         Integer id,

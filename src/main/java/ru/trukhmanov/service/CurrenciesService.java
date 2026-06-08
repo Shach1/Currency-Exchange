@@ -1,8 +1,8 @@
 package ru.trukhmanov.service;
 
-import ru.trukhmanov.model.entity.Currency;
-import ru.trukhmanov.service.dto.request.CreateCurrencyRequest;
-import ru.trukhmanov.service.dto.response.CurrencyResponse;
+import ru.trukhmanov.entity.Currency;
+import ru.trukhmanov.dto.request.CreateCurrencyRequest;
+import ru.trukhmanov.dto.response.CurrencyResponse;
 
 import java.util.List;
 
@@ -16,9 +16,9 @@ public interface CurrenciesService{
 
     CurrencyResponse mapToCurrencyDto(Currency currency);
 
-    CurrencyResponse getCurrencyByCode(String code);
+    Currency mapToCurrency(CurrencyResponse currencyResponse);
 
-    CurrencyResponse getCurrencyById(Integer id);
+    CurrencyResponse getCurrencyByCode(String code);
 
     CurrencyResponse createCurrency(CreateCurrencyRequest request);
 

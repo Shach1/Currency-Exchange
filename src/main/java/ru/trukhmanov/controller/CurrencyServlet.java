@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.trukhmanov.service.CurrenciesService;
-import ru.trukhmanov.service.dto.response.CurrencyResponse;
+import ru.trukhmanov.dto.response.CurrencyResponse;
 
 import java.io.IOException;
 

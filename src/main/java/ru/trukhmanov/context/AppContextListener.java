@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
-import ru.trukhmanov.model.dao.CurrenciesDao;
-import ru.trukhmanov.model.dao.ExchangeRatesDao;
+import ru.trukhmanov.dao.CurrenciesDao;
+import ru.trukhmanov.dao.CurrenciesDaoImpl;
+import ru.trukhmanov.dao.ExchangeRatesDao;
+import ru.trukhmanov.dao.ExchangeRatesDaoImpl;
 import ru.trukhmanov.service.*;
 
 @WebListener
@@ -16,8 +18,8 @@ public class AppContextListener implements ServletContextListener{
         ServletContextListener.super.contextInitialized(sce);
         var context = sce.getServletContext();
 
-        CurrenciesDao currenciesDao = new CurrenciesDao();
-        ExchangeRatesDao exchangeRatesDao = new ExchangeRatesDao();
+        CurrenciesDao currenciesDao = new CurrenciesDaoImpl();
+        ExchangeRatesDao exchangeRatesDao = new ExchangeRatesDaoImpl();
 
         CurrenciesService currenciesService = new CurrenciesServiceImpl(currenciesDao);
         ExchangeRatesService exchangeRatesService = new ExchangeRatesServiceImpl(exchangeRatesDao, currenciesService);

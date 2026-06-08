@@ -1,10 +1,10 @@
 package ru.trukhmanov.service;
 
+import ru.trukhmanov.dao.CurrenciesDao;
 import ru.trukhmanov.exception.*;
-import ru.trukhmanov.model.dao.CurrenciesDao;
-import ru.trukhmanov.model.entity.Currency;
-import ru.trukhmanov.service.dto.request.CreateCurrencyRequest;
-import ru.trukhmanov.service.dto.response.CurrencyResponse;
+import ru.trukhmanov.entity.Currency;
+import ru.trukhmanov.dto.request.CreateCurrencyRequest;
+import ru.trukhmanov.dto.response.CurrencyResponse;
 import ru.trukhmanov.util.Patterns;
 
 import java.util.List;
@@ -38,6 +38,15 @@ public class CurrenciesServiceImpl implements CurrenciesService{
     }
 
     @Override
+    public Currency mapToCurrency(CurrencyResponse currencyResponse){
+        return new Currency(
+                currencyResponse.id(),
+                currencyResponse.code(),
+                currencyResponse.name(),
+                currencyResponse.sign());
+    }
+
+    @Override
     public CurrencyResponse getCurrencyByCode(String code){
         if(code == null || code.length() != CODE_LENGTH) throw new ValidationException("Invalid request format");
         var result = currenciesDao.findByCode(code);
@@ -46,19 +55,10 @@ public class CurrenciesServiceImpl implements CurrenciesService{
     }
 
     @Override
-    public CurrencyResponse getCurrencyById(Integer id){
-        var result = currenciesDao.findById(id);
-        if(result.isEmpty()) throw new EntityNotFoundException("Currency with id: %d not found".formatted(id));
-        return mapToCurrencyDto(result.get());
-    }
-
-    @Override
     public CurrencyResponse createCurrency(CreateCurrencyRequest request){
         var currency = parseCreateCurrencyRequest(request);
-        currenciesDao.insert(currency);
-        var newCurrency = currenciesDao.findByCode(currency.code());
-        if(newCurrency.isEmpty()) throw new RuntimeException("Unsuspected problem");
-        return mapToCurrencyDto(newCurrency.get());
+        Currency newCurrency = currenciesDao.insert(currency).orElseThrow(() -> new RuntimeException("Unsuspected problem"));
+        return mapToCurrencyDto(newCurrency);
     }
 
     private Currency parseCreateCurrencyRequest(CreateCurrencyRequest request){
@@ -83,7 +83,7 @@ public class CurrenciesServiceImpl implements CurrenciesService{
         if(currency.fullName().length() < NAME_MIN_LENGTH || currency.fullName().length() > NAME_MAX_LENGTH)
             throw new ValidationException("Full name length cannot be less than %d and more than %d".formatted(NAME_MIN_LENGTH, NAME_MAX_LENGTH));
         if(!Patterns.ENG_LETTERS_AND_SPACES_BETWEEN_WORDS.matcher(currency.fullName()).matches())
-            throw new ValidationException("Full name can contain only letters and spaces between words");
+            throw new ValidationException("Full name can contain only English letters and spaces between words");
 
         if(currency.sign() == null) throw new ValidationException("Sign cannot be null");
         if(currency.sign().isBlank() || currency.sign().length() > SIGN_MAX_LENGTH)

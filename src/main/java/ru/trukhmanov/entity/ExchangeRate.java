@@ -1,11 +1,11 @@
-package ru.trukhmanov.model.entity;
+package ru.trukhmanov.entity;
 
 import java.math.BigDecimal;
 
 public record ExchangeRate(
         Integer id,
-        Integer baseCurrencyId,
-        Integer targetCurrencyId,
+        Currency baseCurrency,
+        Currency targetCurrency,
         BigDecimal rate
 ){
 }

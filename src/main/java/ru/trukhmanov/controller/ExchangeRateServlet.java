@@ -9,8 +9,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.trukhmanov.exception.ValidationException;
 import ru.trukhmanov.service.ExchangeRatesService;
-import ru.trukhmanov.service.dto.request.UpdateExchangeRateRequest;
-import ru.trukhmanov.service.dto.response.ExchangeRateResponse;
+import ru.trukhmanov.dto.request.UpdateExchangeRateRequest;
+import ru.trukhmanov.dto.response.ExchangeRateResponse;
 
 import java.io.IOException;
 

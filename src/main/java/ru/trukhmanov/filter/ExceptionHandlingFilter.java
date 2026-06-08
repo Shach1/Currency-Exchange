@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.trukhmanov.exception.*;
-import ru.trukhmanov.service.dto.response.ErrorMessage;
+import ru.trukhmanov.dto.response.ErrorMessage;
 
 import java.io.IOException;
 

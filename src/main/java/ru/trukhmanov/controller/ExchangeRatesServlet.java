@@ -8,8 +8,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.trukhmanov.service.ExchangeRatesService;
-import ru.trukhmanov.service.dto.request.CreateExchangeRateRequest;
-import ru.trukhmanov.service.dto.response.ExchangeRateResponse;
+import ru.trukhmanov.dto.request.CreateExchangeRateRequest;
+import ru.trukhmanov.dto.response.ExchangeRateResponse;
 
 import java.io.IOException;
 import java.util.List;

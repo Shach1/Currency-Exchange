@@ -1,9 +1,9 @@
 package ru.trukhmanov.service;
 
-import ru.trukhmanov.model.entity.ExchangeRate;
-import ru.trukhmanov.service.dto.request.CreateExchangeRateRequest;
-import ru.trukhmanov.service.dto.request.UpdateExchangeRateRequest;
-import ru.trukhmanov.service.dto.response.ExchangeRateResponse;
+import ru.trukhmanov.entity.ExchangeRate;
+import ru.trukhmanov.dto.request.CreateExchangeRateRequest;
+import ru.trukhmanov.dto.request.UpdateExchangeRateRequest;
+import ru.trukhmanov.dto.response.ExchangeRateResponse;
 
 import java.math.RoundingMode;
 import java.util.List;
@@ -13,6 +13,8 @@ public interface ExchangeRatesService{
     RoundingMode ROUNDING_MODE = RoundingMode.DOWN;
 
     List<ExchangeRateResponse> getAllExchangeRates();
+
+    ExchangeRateResponse mapToExchangeRateResponse(ExchangeRate exchangeRate);
 
     ExchangeRateResponse getExchangeRate(String codePair);
 

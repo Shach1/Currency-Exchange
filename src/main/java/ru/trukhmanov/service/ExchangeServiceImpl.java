@@ -2,9 +2,9 @@ package ru.trukhmanov.service;
 
 import ru.trukhmanov.exception.EntityNotFoundException;
 import ru.trukhmanov.exception.ValidationException;
-import ru.trukhmanov.model.entity.ExchangeRate;
-import ru.trukhmanov.service.dto.request.ExchangeRequest;
-import ru.trukhmanov.service.dto.response.ExchangeResponse;
+import ru.trukhmanov.entity.ExchangeRate;
+import ru.trukhmanov.dto.request.ExchangeRequest;
+import ru.trukhmanov.dto.response.ExchangeResponse;
 import ru.trukhmanov.util.Parser;
 
 import java.math.BigDecimal;
