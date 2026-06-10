@@ -5,7 +5,7 @@ import ru.trukhmanov.entity.Currency;
 import ru.trukhmanov.entity.ExchangeRate;
 import ru.trukhmanov.exception.DatabaseException;
 import ru.trukhmanov.exception.EntityAlreadyExistException;
-import ru.trukhmanov.util.DbManager;
+import ru.trukhmanov.util.DatabaseConnectionProvider;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -48,7 +48,7 @@ public class ExchangeRatesDaoImpl implements ExchangeRatesDao{
 
     @Override
     public List<ExchangeRate> getAll(){
-        try(var connection = DbManager.getConnection(); var statement = connection.prepareStatement(FIND_ALL_QUERY)){
+        try(var connection = DatabaseConnectionProvider.getConnection(); var statement = connection.prepareStatement(FIND_ALL_QUERY)){
             ResultSet resultSet = statement.executeQuery();
             return mapResultSetToList(resultSet);
         } catch (SQLException e){
@@ -59,7 +59,7 @@ public class ExchangeRatesDaoImpl implements ExchangeRatesDao{
 
     @Override
     public Optional<ExchangeRate> findByCurrenciesId(Integer baseCurrencyId, Integer targetCurrencyId){
-        try(var connection = DbManager.getConnection(); var statement = connection.prepareStatement(FIND_BY_CURRENCIES_ID_QUERY)){
+        try(var connection = DatabaseConnectionProvider.getConnection(); var statement = connection.prepareStatement(FIND_BY_CURRENCIES_ID_QUERY)){
             statement.setInt(1, baseCurrencyId);
             statement.setInt(2, targetCurrencyId);
             ResultSet resultSet = statement.executeQuery();
@@ -75,7 +75,7 @@ public class ExchangeRatesDaoImpl implements ExchangeRatesDao{
 
     @Override
     public Optional<ExchangeRate> insert(ExchangeRate exchangeRate){
-        try(var connection = DbManager.getConnection(); var statement = connection.prepareStatement(INSERT_QUERY)){
+        try(var connection = DatabaseConnectionProvider.getConnection(); var statement = connection.prepareStatement(INSERT_QUERY)){
             statement.setInt(1, exchangeRate.baseCurrency().id());
             statement.setInt(2, exchangeRate.targetCurrency().id());
             statement.setBigDecimal(3, exchangeRate.rate());
@@ -91,7 +91,7 @@ public class ExchangeRatesDaoImpl implements ExchangeRatesDao{
 
     @Override
     public Optional<ExchangeRate> updateRate(ExchangeRate exchangeRate){
-        try(var connection = DbManager.getConnection(); var statement = connection.prepareStatement(UPDATE_RATE_QUERY)){
+        try(var connection = DatabaseConnectionProvider.getConnection(); var statement = connection.prepareStatement(UPDATE_RATE_QUERY)){
             statement.setBigDecimal(1, exchangeRate.rate());
             statement.setInt(2, exchangeRate.baseCurrency().id());
             statement.setInt(3, exchangeRate.targetCurrency().id());

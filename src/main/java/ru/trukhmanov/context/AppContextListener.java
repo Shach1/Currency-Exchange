@@ -9,6 +9,8 @@ import ru.trukhmanov.dao.CurrenciesDaoImpl;
 import ru.trukhmanov.dao.ExchangeRatesDao;
 import ru.trukhmanov.dao.ExchangeRatesDaoImpl;
 import ru.trukhmanov.service.*;
+import ru.trukhmanov.util.DatabaseConnectionProvider;
+import ru.trukhmanov.util.MigrationExecutor;
 
 @WebListener
 public class AppContextListener implements ServletContextListener{
@@ -17,6 +19,8 @@ public class AppContextListener implements ServletContextListener{
     public void contextInitialized(ServletContextEvent sce){
         ServletContextListener.super.contextInitialized(sce);
         var context = sce.getServletContext();
+
+        new MigrationExecutor("init.sql").migrate();
 
         CurrenciesDao currenciesDao = new CurrenciesDaoImpl();
         ExchangeRatesDao exchangeRatesDao = new ExchangeRatesDaoImpl();
@@ -36,5 +40,6 @@ public class AppContextListener implements ServletContextListener{
     @Override
     public void contextDestroyed(ServletContextEvent sce){
         ServletContextListener.super.contextDestroyed(sce);
+        DatabaseConnectionProvider.closeDataSource();
     }
 }

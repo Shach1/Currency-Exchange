@@ -1,23 +1,29 @@
 package ru.trukhmanov.service;
 
 import ru.trukhmanov.dao.CurrenciesDao;
-import ru.trukhmanov.exception.*;
-import ru.trukhmanov.entity.Currency;
 import ru.trukhmanov.dto.request.CreateCurrencyRequest;
 import ru.trukhmanov.dto.response.CurrencyResponse;
-import ru.trukhmanov.util.Patterns;
+import ru.trukhmanov.entity.Currency;
+import ru.trukhmanov.exception.EntityNotFoundException;
+import ru.trukhmanov.exception.ValidationException;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class CurrenciesServiceImpl implements CurrenciesService{
     private final CurrenciesDao currenciesDao;
     private final Currency cacheGeneralCurrency;
+    public static final Pattern ENG_LETTERS = Pattern.compile("[A-Za-z]+");
+    public static final Pattern ENG_LETTERS_AND_SPACES_BETWEEN_WORDS = Pattern.compile("^[a-zA-Z]+(\\s[a-zA-Z]+)*$");
+
 
     public CurrenciesServiceImpl(CurrenciesDao currenciesDao){
         this.currenciesDao = currenciesDao;
         String generalCurrencyCode = "USD";
         var currency = currenciesDao.findByCode(generalCurrencyCode);
-        if(currency.isEmpty()) throw new RuntimeException("Unable to obtain general currency with code: %s".formatted(generalCurrencyCode));
+        if(currency.isEmpty()){
+            throw new RuntimeException("Unable to obtain general currency with code: %s".formatted(generalCurrencyCode));
+        }
         cacheGeneralCurrency = currency.get();
     }
 
@@ -75,14 +81,15 @@ public class CurrenciesServiceImpl implements CurrenciesService{
 
     private void validateCurrency(Currency currency){
         if(currency.code() == null) throw new ValidationException("Code cannot be null");
-        if(currency.code().length() != CODE_LENGTH) throw new ValidationException("Code length must be equal %d".formatted(CODE_LENGTH));
-        if(!Patterns.ENG_LETTERS.matcher(currency.code()).matches())
+        if(currency.code().length() != CODE_LENGTH)
+            throw new ValidationException("Code length must be equal %d".formatted(CODE_LENGTH));
+        if(!ENG_LETTERS.matcher(currency.code()).matches())
             throw new ValidationException("Code must consist entirely of English letters");
 
         if(currency.fullName() == null) throw new ValidationException("Full name cannot be null");
         if(currency.fullName().length() < NAME_MIN_LENGTH || currency.fullName().length() > NAME_MAX_LENGTH)
             throw new ValidationException("Full name length cannot be less than %d and more than %d".formatted(NAME_MIN_LENGTH, NAME_MAX_LENGTH));
-        if(!Patterns.ENG_LETTERS_AND_SPACES_BETWEEN_WORDS.matcher(currency.fullName()).matches())
+        if(!ENG_LETTERS_AND_SPACES_BETWEEN_WORDS.matcher(currency.fullName()).matches())
             throw new ValidationException("Full name can contain only English letters and spaces between words");
 
         if(currency.sign() == null) throw new ValidationException("Sign cannot be null");

@@ -4,11 +4,14 @@ import ru.trukhmanov.exception.ValidationException;
 
 import java.math.BigDecimal;
 
-public class Parser{
+public final class Parser{
+    private Parser(){
+    }
+
     public static BigDecimal parseBigDecimal(String bigDecimal){
         try{
             return new BigDecimal(bigDecimal);
-        } catch (RuntimeException ignore){
+        } catch (NumberFormatException e){
             throw new ValidationException("Invalid value: %s".formatted(bigDecimal));
         }
     }

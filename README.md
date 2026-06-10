@@ -31,6 +31,6 @@
 
 4) Остается запустить сервер:
 ```shell
-{tomcat_home}/bin/catalina.sh run
+sudo {tomcat_home}/bin/catalina.sh run
 ```
 Сервер доступен по адресу `localhost:8080`
