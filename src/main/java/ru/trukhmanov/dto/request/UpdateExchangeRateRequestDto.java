@@ -1,6 +1,6 @@
 package ru.trukhmanov.dto.request;
 
-public record UpdateExchangeRateRequest(
+public record UpdateExchangeRateRequestDto(
         String codePair,
         String rate
 ){

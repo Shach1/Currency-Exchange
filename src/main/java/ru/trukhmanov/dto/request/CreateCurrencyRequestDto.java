@@ -1,6 +1,6 @@
 package ru.trukhmanov.dto.request;
 
-public record CreateCurrencyRequest(
+public record CreateCurrencyRequestDto(
         String code,
         String name,
         String sign

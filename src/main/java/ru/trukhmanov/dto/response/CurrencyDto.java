@@ -1,6 +1,6 @@
 package ru.trukhmanov.dto.response;
 
-public record CurrencyResponse(
+public record CurrencyDto(
         Integer id,
         String code,
         String name,

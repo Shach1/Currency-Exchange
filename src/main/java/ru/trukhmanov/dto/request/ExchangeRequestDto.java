@@ -1,8 +1,7 @@
 package ru.trukhmanov.dto.request;
 
-public record CreateExchangeRateRequest(
+public record ExchangeRequestDto(
         String baseCurrencyCode,
         String targetCurrencyCode,
-        String rate
-){
+        String amount){
 }

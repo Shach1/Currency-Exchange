@@ -6,7 +6,6 @@ import ru.trukhmanov.exception.DatabaseException;
 import java.io.*;
 import java.sql.SQLException;
 import java.util.Arrays;
-
 import java.util.List;
 
 public final class MigrationExecutor{
@@ -38,7 +37,7 @@ public final class MigrationExecutor{
                 var statement = connection.prepareStatement(query)){
                 statement.executeUpdate();
             } catch (SQLException e){
-                if(e.getErrorCode() != SQLiteErrorCode.SQLITE_CONSTRAINT.code){
+                if (e.getErrorCode() != SQLiteErrorCode.SQLITE_CONSTRAINT.code){
                     throw new DatabaseException("Error while performing migration");
                 }
             }
@@ -47,11 +46,11 @@ public final class MigrationExecutor{
 
     private InputStream openMigrationFile(String fileName) throws FileNotFoundException{
         File migrationFile = new File(fileName);
-        if(migrationFile.isFile()){
+        if (migrationFile.isFile()){
             return new FileInputStream(migrationFile);
         }
         var inputStream = this.getClass().getResourceAsStream(fileName);
-        if(inputStream == null){
+        if (inputStream == null){
             inputStream = this.getClass().getClassLoader().getResourceAsStream(fileName);
         }
         return inputStream;

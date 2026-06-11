@@ -7,9 +7,9 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import ru.trukhmanov.dto.request.ExchangeRequestDto;
+import ru.trukhmanov.dto.response.ExchangeDto;
 import ru.trukhmanov.service.ExchangeService;
-import ru.trukhmanov.dto.request.ExchangeRequest;
-import ru.trukhmanov.dto.response.ExchangeResponse;
 
 import java.io.IOException;
 
@@ -32,9 +32,9 @@ public class ExchangeServlet extends HttpServlet{
         String baseCurrencyCode = req.getParameter("from");
         String targetCurrencyCode = req.getParameter("to");
         String amount = req.getParameter("amount");
-        var request = new ExchangeRequest(baseCurrencyCode, targetCurrencyCode, amount);
+        var request = new ExchangeRequestDto(baseCurrencyCode, targetCurrencyCode, amount);
 
-        ExchangeResponse result = exchangeService.calculateExchange(request);
+        ExchangeDto result = exchangeService.calculateExchange(request);
         resp.setStatus(200);
         out.println(gson.toJson(result));
     }

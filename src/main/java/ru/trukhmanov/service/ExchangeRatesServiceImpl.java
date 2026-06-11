@@ -4,9 +4,10 @@ import ru.trukhmanov.dao.ExchangeRatesDao;
 import ru.trukhmanov.entity.ExchangeRate;
 import ru.trukhmanov.exception.EntityNotFoundException;
 import ru.trukhmanov.exception.ValidationException;
-import ru.trukhmanov.dto.request.CreateExchangeRateRequest;
-import ru.trukhmanov.dto.request.UpdateExchangeRateRequest;
-import ru.trukhmanov.dto.response.ExchangeRateResponse;
+import ru.trukhmanov.dto.request.CreateExchangeRateRequestDto;
+import ru.trukhmanov.dto.request.UpdateExchangeRateRequestDto;
+import ru.trukhmanov.dto.response.ExchangeRateDto;
+import ru.trukhmanov.mapper.CurrencyMapper;
 import ru.trukhmanov.util.Parser;
 
 import java.math.BigDecimal;
@@ -22,7 +23,7 @@ public class ExchangeRatesServiceImpl implements ExchangeRatesService{
     }
 
     @Override
-    public List<ExchangeRateResponse> getAllExchangeRates(){
+    public List<ExchangeRateDto> getAllExchangeRates(){
         return ratesDao.getAll()
                 .stream()
                 .map(this::mapToExchangeRateResponse)
@@ -30,16 +31,16 @@ public class ExchangeRatesServiceImpl implements ExchangeRatesService{
     }
 
     @Override
-    public ExchangeRateResponse mapToExchangeRateResponse(ExchangeRate exchangeRate){
-        return new ExchangeRateResponse(
+    public ExchangeRateDto mapToExchangeRateResponse(ExchangeRate exchangeRate){
+        return new ExchangeRateDto(
                 exchangeRate.id(),
-                currenciesService.mapToCurrencyDto(exchangeRate.baseCurrency()),
-                currenciesService.mapToCurrencyDto(exchangeRate.targetCurrency()),
+                CurrencyMapper.INSTANCE.CurrencyToCurrencyDto(exchangeRate.baseCurrency()),
+                CurrencyMapper.INSTANCE.CurrencyToCurrencyDto(exchangeRate.targetCurrency()),
                 exchangeRate.rate());
     }
 
     @Override
-    public ExchangeRateResponse getExchangeRate(String codePair){
+    public ExchangeRateDto getExchangeRate(String codePair){
         return mapToExchangeRateResponse(getExchangeRateByCodePair(codePair));
     }
 
@@ -61,14 +62,14 @@ public class ExchangeRatesServiceImpl implements ExchangeRatesService{
     }
 
     @Override
-    public ExchangeRateResponse createExchangeRate(CreateExchangeRateRequest request){
+    public ExchangeRateDto createExchangeRate(CreateExchangeRateRequestDto request){
         ExchangeRate exchangeRate = parseCreateExchangeRateRequest(request);
 
         ExchangeRate created = ratesDao.insert(exchangeRate).orElseThrow(() -> new RuntimeException("Unsuspected problem"));
         return mapToExchangeRateResponse(created);
     }
 
-    private ExchangeRate parseCreateExchangeRateRequest(CreateExchangeRateRequest request){
+    private ExchangeRate parseCreateExchangeRateRequest(CreateExchangeRateRequestDto request){
         if(request.baseCurrencyCode() == null || request.baseCurrencyCode().isBlank()){
             throw new ValidationException("%s form field is missing".formatted("baseCurrencyCode"));
         }
@@ -83,8 +84,8 @@ public class ExchangeRatesServiceImpl implements ExchangeRatesService{
         var currency2 = currenciesService.getCurrencyByCode(request.targetCurrencyCode());
         return getValidatedExchangeRate(new ExchangeRate(
                 null,
-                currenciesService.mapToCurrency(currency1),
-                currenciesService.mapToCurrency(currency2),
+                CurrencyMapper.INSTANCE.CurrencyDtoToCurrency(currency1),
+                CurrencyMapper.INSTANCE.CurrencyDtoToCurrency(currency2),
                 rateDecimal));
     }
 
@@ -109,7 +110,7 @@ public class ExchangeRatesServiceImpl implements ExchangeRatesService{
     }
 
     @Override
-    public ExchangeRateResponse updateExchangeRate(UpdateExchangeRateRequest request){
+    public ExchangeRateDto updateExchangeRate(UpdateExchangeRateRequestDto request){
         if(request.rate() == null) throw new ValidationException("Rate cannot be null");
         ExchangeRate exchangeRate = getExchangeRateByCodePair(request.codePair());
         ExchangeRate updated = ratesDao.updateRate(getValidatedExchangeRate(new ExchangeRate(

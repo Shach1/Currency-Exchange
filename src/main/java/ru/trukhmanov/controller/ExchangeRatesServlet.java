@@ -7,9 +7,9 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import ru.trukhmanov.dto.request.CreateExchangeRateRequestDto;
+import ru.trukhmanov.dto.response.ExchangeRateDto;
 import ru.trukhmanov.service.ExchangeRatesService;
-import ru.trukhmanov.dto.request.CreateExchangeRateRequest;
-import ru.trukhmanov.dto.response.ExchangeRateResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,7 +29,7 @@ public class ExchangeRatesServlet extends HttpServlet{
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException{
         var out = resp.getWriter();
-        List<ExchangeRateResponse> result = ratesService.getAllExchangeRates();
+        List<ExchangeRateDto> result = ratesService.getAllExchangeRates();
         resp.setStatus(200);
         out.println(gson.toJson(result));
     }
@@ -41,9 +41,9 @@ public class ExchangeRatesServlet extends HttpServlet{
         String baseCurrencyCode = req.getParameter("baseCurrencyCode");
         String targetCurrencyCode = req.getParameter("targetCurrencyCode");
         String rate = req.getParameter("rate");
-        var request = new CreateExchangeRateRequest(baseCurrencyCode, targetCurrencyCode, rate);
+        var request = new CreateExchangeRateRequestDto(baseCurrencyCode, targetCurrencyCode, rate);
 
-        ExchangeRateResponse result = ratesService.createExchangeRate(request);
+        ExchangeRateDto result = ratesService.createExchangeRate(request);
         resp.setStatus(201);
         out.println(gson.toJson(result));
     }

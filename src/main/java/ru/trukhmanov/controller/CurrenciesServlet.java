@@ -7,9 +7,9 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import ru.trukhmanov.dto.request.CreateCurrencyRequestDto;
+import ru.trukhmanov.dto.response.CurrencyDto;
 import ru.trukhmanov.service.CurrenciesService;
-import ru.trukhmanov.dto.request.CreateCurrencyRequest;
-import ru.trukhmanov.dto.response.CurrencyResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,7 +29,7 @@ public class CurrenciesServlet extends HttpServlet{
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException{
         var out = resp.getWriter();
-        List<CurrencyResponse> result = currenciesService.getAllCurrencies();
+        List<CurrencyDto> result = currenciesService.getAllCurrencies();
         resp.setStatus(200);
         out.println(gson.toJson(result));
     }
@@ -38,12 +38,12 @@ public class CurrenciesServlet extends HttpServlet{
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException{
         var out = resp.getWriter();
 
-        String name = req.getParameter("name");
-        String code = req.getParameter("code");
-        String sign = req.getParameter("sign");
-        var request = new CreateCurrencyRequest(code, name, sign);
+        String name = req.getParameter("name").trim();
+        String code = req.getParameter("code").trim().toUpperCase();
+        String sign = req.getParameter("sign").trim();
+        var request = new CreateCurrencyRequestDto(code, name, sign);
 
-        CurrencyResponse result = currenciesService.createCurrency(request);
+        CurrencyDto result = currenciesService.createCurrency(request);
         resp.setStatus(201);
         out.println(gson.toJson(result));
     }

@@ -1,8 +1,7 @@
 package ru.trukhmanov.service;
 
-import ru.trukhmanov.entity.Currency;
-import ru.trukhmanov.dto.request.CreateCurrencyRequest;
-import ru.trukhmanov.dto.response.CurrencyResponse;
+import ru.trukhmanov.dto.request.CreateCurrencyRequestDto;
+import ru.trukhmanov.dto.response.CurrencyDto;
 
 import java.util.List;
 
@@ -12,15 +11,9 @@ public interface CurrenciesService{
     int NAME_MAX_LENGTH = 20;
     int SIGN_MAX_LENGTH = 3;
 
-    List<CurrencyResponse> getAllCurrencies();
+    List<CurrencyDto> getAllCurrencies();
 
-    CurrencyResponse mapToCurrencyDto(Currency currency);
+    CurrencyDto getCurrencyByCode(String code);
 
-    Currency mapToCurrency(CurrencyResponse currencyResponse);
-
-    CurrencyResponse getCurrencyByCode(String code);
-
-    CurrencyResponse createCurrency(CreateCurrencyRequest request);
-
-    Currency getGeneralCurrency();
+    CurrencyDto createCurrency(CreateCurrencyRequestDto request);
 }

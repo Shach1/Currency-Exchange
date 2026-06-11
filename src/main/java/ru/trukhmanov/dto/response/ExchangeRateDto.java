@@ -2,10 +2,10 @@ package ru.trukhmanov.dto.response;
 
 import java.math.BigDecimal;
 
-public record ExchangeRateResponse(
+public record ExchangeRateDto(
         Integer id,
-        CurrencyResponse baseCurrency,
-        CurrencyResponse targetCurrency,
+        CurrencyDto baseCurrency,
+        CurrencyDto targetCurrency,
         BigDecimal rate
 ){
 }

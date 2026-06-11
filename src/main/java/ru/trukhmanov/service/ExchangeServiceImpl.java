@@ -1,16 +1,21 @@
 package ru.trukhmanov.service;
 
+import ru.trukhmanov.dto.response.CurrencyDto;
+import ru.trukhmanov.entity.Currency;
 import ru.trukhmanov.exception.EntityNotFoundException;
 import ru.trukhmanov.exception.ValidationException;
 import ru.trukhmanov.entity.ExchangeRate;
-import ru.trukhmanov.dto.request.ExchangeRequest;
-import ru.trukhmanov.dto.response.ExchangeResponse;
+import ru.trukhmanov.dto.request.ExchangeRequestDto;
+import ru.trukhmanov.dto.response.ExchangeDto;
+import ru.trukhmanov.mapper.CurrencyMapper;
 import ru.trukhmanov.util.Parser;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
 public class ExchangeServiceImpl implements ExchangeService{
+    private final static String GENERAL_CURRENCY_CODE = "USD";
+    private Currency cacheGeneralCurrency;
     private final ExchangeRatesService ratesService;
     private final CurrenciesService currenciesService;
 
@@ -20,7 +25,7 @@ public class ExchangeServiceImpl implements ExchangeService{
     }
 
     @Override
-    public ExchangeResponse calculateExchange(ExchangeRequest request){
+    public ExchangeDto calculateExchange(ExchangeRequestDto request){
         if(request.baseCurrencyCode() == null || request.baseCurrencyCode().isBlank() ||
                 request.targetCurrencyCode() == null || request.targetCurrencyCode().isBlank() ||
                 request.amount() == null || request.amount().isBlank()) throw new ValidationException("Invalid request format");
@@ -31,7 +36,7 @@ public class ExchangeServiceImpl implements ExchangeService{
         var rate = getRate(baseCurrency.id(), targetCurrency.id());
         var convertedAmount = rate.multiply(amount);
 
-        return new ExchangeResponse(
+        return new ExchangeDto(
                 baseCurrency,
                 targetCurrency,
                 rate,
@@ -72,16 +77,27 @@ public class ExchangeServiceImpl implements ExchangeService{
     }
 
     private BigDecimal getRateByGeneralCurrency(Integer baseCurrencyId, Integer targetCurrencyId){
-        var generalCurrency = currenciesService.getGeneralCurrency();
+        if(cacheGeneralCurrency == null){
+            cacheGeneralCurrency = getGeneralCurrency();
+        }
 
-        Optional<BigDecimal> baseToGeneralRate = getDirectRate(baseCurrencyId, generalCurrency.id());
-        if(baseToGeneralRate.isEmpty()) baseToGeneralRate = getReversedRate( baseCurrencyId, generalCurrency.id());
+        Optional<BigDecimal> baseToGeneralRate = getDirectRate(baseCurrencyId, cacheGeneralCurrency.id());
+        if(baseToGeneralRate.isEmpty()) baseToGeneralRate = getReversedRate( baseCurrencyId, cacheGeneralCurrency.id());
         if(baseToGeneralRate.isEmpty()) throw new EntityNotFoundException("Impossible to calculate the exchange rate for this currency pair");
 
-        Optional<BigDecimal> generalToTargetRate = getDirectRate(generalCurrency.id(), targetCurrencyId);
-        if(generalToTargetRate.isEmpty()) generalToTargetRate = getReversedRate(generalCurrency.id(), targetCurrencyId);
+        Optional<BigDecimal> generalToTargetRate = getDirectRate(cacheGeneralCurrency.id(), targetCurrencyId);
+        if(generalToTargetRate.isEmpty()) generalToTargetRate = getReversedRate(cacheGeneralCurrency.id(), targetCurrencyId);
         if(generalToTargetRate.isEmpty()) throw new EntityNotFoundException("Impossible to calculate the exchange rate for this currency pair");
 
         return baseToGeneralRate.get().multiply(generalToTargetRate.get());
+    }
+
+    private Currency getGeneralCurrency(){
+        try{
+            CurrencyDto currencyDto = currenciesService.getCurrencyByCode(GENERAL_CURRENCY_CODE);
+            return CurrencyMapper.INSTANCE.CurrencyDtoToCurrency(currencyDto);
+        } catch (EntityNotFoundException e){
+            throw new EntityNotFoundException("Impossible to calculate the exchange rate for this currency pair");
+        }
     }
 }

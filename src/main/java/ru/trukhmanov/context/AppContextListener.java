@@ -20,7 +20,6 @@ public class AppContextListener implements ServletContextListener{
         ServletContextListener.super.contextInitialized(sce);
         var context = sce.getServletContext();
 
-        new MigrationExecutor("init.sql").migrate();
 
         CurrenciesDao currenciesDao = new CurrenciesDaoImpl();
         ExchangeRatesDao exchangeRatesDao = new ExchangeRatesDaoImpl();

@@ -15,6 +15,8 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.49.1.0")
     implementation("com.zaxxer:HikariCP:7.0.2")
     implementation("com.google.code.gson:gson:2.13.2")
+    implementation("org.mapstruct:mapstruct:1.6.3")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_21

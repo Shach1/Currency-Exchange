@@ -43,10 +43,8 @@ public class CurrenciesDaoImpl implements CurrenciesDao{
         try(var connection = DatabaseConnectionProvider.getConnection();
             var statement = connection.prepareStatement(FIND_BY_CODE_QUERY)){
             statement.setString(1, code);
-            ResultSet resultSet = statement.executeQuery();
-            var result = mapResultSetToList(resultSet);
-            if(result.isEmpty()) return Optional.empty();
-            return Optional.of(result.getFirst());
+            ResultSet result = statement.executeQuery();
+            return mapResultSetToOptional(result);
         } catch (SQLException e){
             System.out.println(e.getMessage());
             throw new DatabaseException("Unsuspected database problem");
@@ -60,10 +58,8 @@ public class CurrenciesDaoImpl implements CurrenciesDao{
             statement.setString(1, currency.code());
             statement.setString(2, currency.fullName());
             statement.setString(3, currency.sign());
-            ResultSet resultSet = statement.executeQuery();
-            var result = mapResultSetToList(resultSet);
-            if(result.isEmpty()) return Optional.empty();
-            return Optional.of(result.getFirst());
+            ResultSet result = statement.executeQuery();
+            return mapResultSetToOptional(result);
         } catch (SQLException e){
             if(e.getErrorCode() == SQLiteErrorCode.SQLITE_CONSTRAINT.code){
                 throw new EntityAlreadyExistException("A currency with this code already exists");
@@ -72,11 +68,32 @@ public class CurrenciesDaoImpl implements CurrenciesDao{
         }
     }
 
+    private Optional<Currency> mapResultSetToOptional(ResultSet resultSet){
+        try{
+            if(resultSet.next()){
+                return Optional.of(new Currency(
+                        resultSet.getInt("id"),
+                        resultSet.getString("code"),
+                        resultSet.getString("full_name"),
+                        resultSet.getString("sign"))
+                );
+            }
+            return Optional.empty();
+        } catch (SQLException e){
+            throw new DatabaseException("Failed data conversion from database");
+        }
+    }
+
     private List<Currency> mapResultSetToList(ResultSet resultSet){
         List<Currency> list = new ArrayList<>();
         try{
             while(resultSet.next()){
-                list.add(new Currency(resultSet.getInt(1), resultSet.getString(2), resultSet.getString(3), resultSet.getString(4)));
+                list.add(new Currency(
+                        resultSet.getInt("id"),
+                        resultSet.getString("code"),
+                        resultSet.getString("full_name"),
+                        resultSet.getString("sign"))
+                );
             }
         } catch (SQLException e){
             throw new DatabaseException("Failed data conversion from database");
