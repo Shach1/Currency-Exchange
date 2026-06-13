@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.trukhmanov.dto.response.CurrencyDto;
+import ru.trukhmanov.mapper.CurrencyMapper;
 import ru.trukhmanov.service.CurrenciesService;
 
 import java.io.IOException;
@@ -29,7 +30,7 @@ public class CurrencyServlet extends HttpServlet{
         var out = resp.getWriter();
         String pathVar = req.getPathInfo().substring(1);
 
-        CurrencyDto result = currenciesService.getCurrencyByCode(pathVar);
+        CurrencyDto result = CurrencyMapper.INSTANCE.toCurrencyDto(currenciesService.getCurrencyByCode(pathVar));
         resp.setStatus(200);
         out.println(gson.toJson(result));
     }

@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 import static ru.trukhmanov.service.CurrenciesService.*;
 
-public class CurrencyValidator{
+public final class CurrencyValidator{
     public static final Pattern ENG_LETTERS = Pattern.compile("[A-Za-z]+");
     public static final Pattern ENG_LETTERS_AND_SPACES_BETWEEN_WORDS = Pattern.compile("^[a-zA-Z]+(\\s[a-zA-Z]+)*$");
 

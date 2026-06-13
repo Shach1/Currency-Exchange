@@ -1,5 +1,6 @@
 package ru.trukhmanov.mapper;
 
+import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -12,8 +13,5 @@ public interface CurrencyMapper{
     CurrencyMapper INSTANCE = Mappers.getMapper(CurrencyMapper.class);
 
     @Mapping(target = "name", source = "fullName")
-    CurrencyDto CurrencyToCurrencyDto(Currency currency);
-
-    @Mapping(target = "fullName", source = "name")
-    Currency CurrencyDtoToCurrency(CurrencyDto currencyDto);
+    CurrencyDto toCurrencyDto(Currency currency);
 }

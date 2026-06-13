@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.trukhmanov.dto.request.CreateCurrencyRequestDto;
 import ru.trukhmanov.dto.response.CurrencyDto;
+import ru.trukhmanov.mapper.CurrencyMapper;
 import ru.trukhmanov.service.CurrenciesService;
 
 import java.io.IOException;
@@ -29,7 +30,10 @@ public class CurrenciesServlet extends HttpServlet{
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException{
         var out = resp.getWriter();
-        List<CurrencyDto> result = currenciesService.getAllCurrencies();
+        List<CurrencyDto> result = currenciesService.getAllCurrencies()
+                .stream()
+                .map(CurrencyMapper.INSTANCE::toCurrencyDto)
+                .toList();
         resp.setStatus(200);
         out.println(gson.toJson(result));
     }
@@ -43,7 +47,7 @@ public class CurrenciesServlet extends HttpServlet{
         String sign = req.getParameter("sign").trim();
         var request = new CreateCurrencyRequestDto(code, name, sign);
 
-        CurrencyDto result = currenciesService.createCurrency(request);
+        CurrencyDto result = CurrencyMapper.INSTANCE.toCurrencyDto(currenciesService.createCurrency(request));
         resp.setStatus(201);
         out.println(gson.toJson(result));
     }

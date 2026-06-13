@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.trukhmanov.dto.request.CreateExchangeRateRequestDto;
 import ru.trukhmanov.dto.response.ExchangeRateDto;
+import ru.trukhmanov.mapper.ExchangeRateMapper;
 import ru.trukhmanov.service.ExchangeRatesService;
 
 import java.io.IOException;
@@ -29,7 +30,10 @@ public class ExchangeRatesServlet extends HttpServlet{
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException{
         var out = resp.getWriter();
-        List<ExchangeRateDto> result = ratesService.getAllExchangeRates();
+        List<ExchangeRateDto> result = ratesService.getAllExchangeRates()
+                .stream()
+                .map(ExchangeRateMapper.INSTANCE::toExchangeRateDto)
+                .toList();
         resp.setStatus(200);
         out.println(gson.toJson(result));
     }
@@ -43,7 +47,7 @@ public class ExchangeRatesServlet extends HttpServlet{
         String rate = req.getParameter("rate");
         var request = new CreateExchangeRateRequestDto(baseCurrencyCode, targetCurrencyCode, rate);
 
-        ExchangeRateDto result = ratesService.createExchangeRate(request);
+        ExchangeRateDto result = ExchangeRateMapper.INSTANCE.toExchangeRateDto(ratesService.createExchangeRate(request));
         resp.setStatus(201);
         out.println(gson.toJson(result));
     }

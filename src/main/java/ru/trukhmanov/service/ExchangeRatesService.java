@@ -1,26 +1,23 @@
 package ru.trukhmanov.service;
 
-import ru.trukhmanov.entity.ExchangeRate;
 import ru.trukhmanov.dto.request.CreateExchangeRateRequestDto;
 import ru.trukhmanov.dto.request.UpdateExchangeRateRequestDto;
-import ru.trukhmanov.dto.response.ExchangeRateDto;
+import ru.trukhmanov.entity.ExchangeRate;
 
 import java.math.RoundingMode;
 import java.util.List;
 
 public interface ExchangeRatesService{
     Integer SCALE = 6;
-    RoundingMode ROUNDING_MODE = RoundingMode.DOWN;
+    RoundingMode ROUNDING_MODE = RoundingMode.HALF_UP;
 
-    List<ExchangeRateDto> getAllExchangeRates();
+    List<ExchangeRate> getAllExchangeRates();
 
-    ExchangeRateDto mapToExchangeRateResponse(ExchangeRate exchangeRate);
-
-    ExchangeRateDto getExchangeRate(String codePair);
-
-    ExchangeRateDto createExchangeRate(CreateExchangeRateRequestDto request);
-
-    ExchangeRateDto updateExchangeRate(UpdateExchangeRateRequestDto request);
+    ExchangeRate getExchangeRateByCodePair(String codePair);
 
     ExchangeRate getExchangeRateByCurrenciesId(Integer baseCurrencyId, Integer targetCurrencyId);
+
+    ExchangeRate createExchangeRate(CreateExchangeRateRequestDto request);
+
+    ExchangeRate updateExchangeRate(UpdateExchangeRateRequestDto request);
 }

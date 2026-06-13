@@ -1,14 +1,13 @@
 package ru.trukhmanov.service;
 
 import ru.trukhmanov.dao.ExchangeRatesDao;
+import ru.trukhmanov.dto.request.CreateExchangeRateRequestDto;
+import ru.trukhmanov.dto.request.UpdateExchangeRateRequestDto;
 import ru.trukhmanov.entity.ExchangeRate;
 import ru.trukhmanov.exception.EntityNotFoundException;
 import ru.trukhmanov.exception.ValidationException;
-import ru.trukhmanov.dto.request.CreateExchangeRateRequestDto;
-import ru.trukhmanov.dto.request.UpdateExchangeRateRequestDto;
-import ru.trukhmanov.dto.response.ExchangeRateDto;
-import ru.trukhmanov.mapper.CurrencyMapper;
 import ru.trukhmanov.util.Parser;
+import ru.trukhmanov.validation.ExchangeRateValidator;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -23,102 +22,68 @@ public class ExchangeRatesServiceImpl implements ExchangeRatesService{
     }
 
     @Override
-    public List<ExchangeRateDto> getAllExchangeRates(){
-        return ratesDao.getAll()
-                .stream()
-                .map(this::mapToExchangeRateResponse)
-                .toList();
+    public List<ExchangeRate> getAllExchangeRates(){
+        return ratesDao.getAll();
     }
 
     @Override
-    public ExchangeRateDto mapToExchangeRateResponse(ExchangeRate exchangeRate){
-        return new ExchangeRateDto(
-                exchangeRate.id(),
-                CurrencyMapper.INSTANCE.CurrencyToCurrencyDto(exchangeRate.baseCurrency()),
-                CurrencyMapper.INSTANCE.CurrencyToCurrencyDto(exchangeRate.targetCurrency()),
-                exchangeRate.rate());
-    }
-
-    @Override
-    public ExchangeRateDto getExchangeRate(String codePair){
-        return mapToExchangeRateResponse(getExchangeRateByCodePair(codePair));
-    }
-
-    private ExchangeRate getExchangeRateByCodePair(String codePair){
-        if(codePair.length() != CurrenciesService.CODE_LENGTH * 2)
+    public ExchangeRate getExchangeRateByCodePair(String codePair){
+        if (codePair.length() != CurrenciesService.CODE_LENGTH * 2){
             throw new ValidationException("Invalid request format");
+        }
         String baseCurrencyCode = codePair.substring(0, CurrenciesService.CODE_LENGTH);
         String targetCurrencyCode = codePair.substring(CurrenciesService.CODE_LENGTH, CurrenciesService.CODE_LENGTH * 2);
 
-        var currency1 = currenciesService.getCurrencyByCode(baseCurrencyCode);
-        var currency2 = currenciesService.getCurrencyByCode(targetCurrencyCode);
-        return getExchangeRateByCurrenciesId(currency1.id(), currency2.id());
+        var baseCurrency = currenciesService.getCurrencyByCode(baseCurrencyCode);
+        var targetCurrency = currenciesService.getCurrencyByCode(targetCurrencyCode);
+        return getExchangeRateByCurrenciesId(baseCurrency.id(), targetCurrency.id());
     }
 
+    @Override
     public ExchangeRate getExchangeRateByCurrenciesId(Integer baseCurrencyId, Integer targetCurrencyId){
         var result = ratesDao.findByCurrenciesId(baseCurrencyId, targetCurrencyId);
-        if(result.isEmpty()) throw new EntityNotFoundException("Exchange rate not found for the pair");
+        if (result.isEmpty()){
+            throw new EntityNotFoundException("Exchange rate not found for the pair");
+        }
         return result.get();
     }
 
     @Override
-    public ExchangeRateDto createExchangeRate(CreateExchangeRateRequestDto request){
-        ExchangeRate exchangeRate = parseCreateExchangeRateRequest(request);
-
-        ExchangeRate created = ratesDao.insert(exchangeRate).orElseThrow(() -> new RuntimeException("Unsuspected problem"));
-        return mapToExchangeRateResponse(created);
+    public ExchangeRate createExchangeRate(CreateExchangeRateRequestDto request){
+        ExchangeRate newExchangeRate = parseCreateExchangeRateRequest(request);
+        newExchangeRate = ratesDao.insert(newExchangeRate).orElseThrow(() -> new RuntimeException("Create failed. Unsuspected problem"));
+        return newExchangeRate;
     }
 
     private ExchangeRate parseCreateExchangeRateRequest(CreateExchangeRateRequestDto request){
-        if(request.baseCurrencyCode() == null || request.baseCurrencyCode().isBlank()){
-            throw new ValidationException("%s form field is missing".formatted("baseCurrencyCode"));
-        }
-        if(request.targetCurrencyCode() == null || request.targetCurrencyCode().isBlank()){
-            throw new ValidationException("%s form field is missing".formatted("targetCurrencyCode"));
-        }
-        if(request.rate() == null || request.rate().isBlank()){
-            throw new ValidationException("%s form field is missing".formatted("rate"));
-        }
-        var rateDecimal = Parser.parseBigDecimal(request.rate());
-        var currency1 = currenciesService.getCurrencyByCode(request.baseCurrencyCode());
-        var currency2 = currenciesService.getCurrencyByCode(request.targetCurrencyCode());
-        return getValidatedExchangeRate(new ExchangeRate(
+        ExchangeRateValidator.validateCreateExchangeRateRequest(request);
+        var rate = Parser.parseBigDecimal(request.rate());
+        var baseCurrency = currenciesService.getCurrencyByCode(request.baseCurrencyCode());
+        var targetCurrency = currenciesService.getCurrencyByCode(request.targetCurrencyCode());
+        var newExchangeRate = new ExchangeRate(
                 null,
-                CurrencyMapper.INSTANCE.CurrencyDtoToCurrency(currency1),
-                CurrencyMapper.INSTANCE.CurrencyDtoToCurrency(currency2),
-                rateDecimal));
+                baseCurrency,
+                targetCurrency,
+                getNormalizedRate(rate));
+
+        ExchangeRateValidator.validateExchangeRate(newExchangeRate);
+        return newExchangeRate;
     }
 
-    private ExchangeRate getValidatedExchangeRate(ExchangeRate er){
-        if(er.baseCurrency().id() == null) throw new ValidationException("Base currency id cannot be null");
-        if(er.baseCurrency().id() < 1) throw new ValidationException("Base currency id cannot be less than 1");
-
-        if(er.targetCurrency().id() == null) throw new ValidationException("Target currency id cannot be null");
-        if(er.targetCurrency().id() < 1) throw new ValidationException("Target currency id cannot be less than 1");
-        if(er.targetCurrency().id().equals(er.baseCurrency().id()))
-            throw new ValidationException("Base and target currency identifiers cannot be equal");
-
-        if(er.rate() == null) throw new ValidationException("Rate cannot be null");
-        if(er.rate().compareTo(BigDecimal.ZERO) < 1)
-            throw new ValidationException("Exchange rate cannot be less than 0");
-        return new ExchangeRate(
-                null,
-                er.baseCurrency(),
-                er.targetCurrency(),
-                er.rate().setScale(SCALE, ROUNDING_MODE)
-        );
+    private BigDecimal getNormalizedRate(BigDecimal rate){
+        return rate.setScale(SCALE, ROUNDING_MODE);
     }
 
     @Override
-    public ExchangeRateDto updateExchangeRate(UpdateExchangeRateRequestDto request){
-        if(request.rate() == null) throw new ValidationException("Rate cannot be null");
+    public ExchangeRate updateExchangeRate(UpdateExchangeRateRequestDto request){
         ExchangeRate exchangeRate = getExchangeRateByCodePair(request.codePair());
-        ExchangeRate updated = ratesDao.updateRate(getValidatedExchangeRate(new ExchangeRate(
+        ExchangeRate updated = new ExchangeRate(
                 exchangeRate.id(),
                 exchangeRate.baseCurrency(),
                 exchangeRate.targetCurrency(),
-                Parser.parseBigDecimal(request.rate())
-        ))).orElseThrow(() -> new EntityNotFoundException("Exchange rate not found for the pair"));
-        return mapToExchangeRateResponse(updated);
+                getNormalizedRate(Parser.parseBigDecimal(request.rate())));
+        ExchangeRateValidator.validateRate(updated.rate());
+        updated = ratesDao.updateRate(updated).orElseThrow(() -> new RuntimeException("Update failed. Unsuspected error"));
+        return updated;
     }
 }
