@@ -43,7 +43,7 @@ public class ExchangeRateServlet extends HttpServlet{
 
         if (req.getPathInfo() == null) throw new ValidationException("Invalid request format");
         String codePair = req.getPathInfo().substring(1).trim();
-        String rate = req.getParameter("rate").trim();
+        String rate = req.getParameter("rate");
         var request = new UpdateExchangeRateRequestDto(codePair, rate);
 
         ExchangeRateDto result = ExchangeRateMapper.INSTANCE.toExchangeRateDto(ratesService.updateExchangeRate(request));

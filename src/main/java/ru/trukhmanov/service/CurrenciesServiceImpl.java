@@ -23,7 +23,7 @@ public class CurrenciesServiceImpl implements CurrenciesService{
     @Override
     public Currency getCurrencyByCode(String code){
         CurrencyValidator.validateCode(code);
-        var result = currenciesDao.findByCode(code);
+        var result = currenciesDao.findByCode(code.toUpperCase());
         if (result.isEmpty()){
             throw new EntityNotFoundException("Currency with code: %s not found".formatted(code));
         }
@@ -32,7 +32,12 @@ public class CurrenciesServiceImpl implements CurrenciesService{
 
     @Override
     public Currency createCurrency(CreateCurrencyRequestDto request){
-        Currency newCurrency = new Currency(null, request.code(), request.name(), request.sign());
+        CurrencyValidator.validateCreateCurrencyRequestDto(request);
+        Currency newCurrency = new Currency(
+                null,
+                request.code().trim().toUpperCase(),
+                request.name().trim(),
+                request.sign().trim());
         CurrencyValidator.validateCurrency(newCurrency);
         newCurrency = currenciesDao.insert(newCurrency).orElseThrow(() -> new RuntimeException("Unsuspected problem"));
         return newCurrency;

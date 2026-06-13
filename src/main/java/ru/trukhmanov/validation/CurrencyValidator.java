@@ -1,5 +1,6 @@
 package ru.trukhmanov.validation;
 
+import ru.trukhmanov.dto.request.CreateCurrencyRequestDto;
 import ru.trukhmanov.entity.Currency;
 import ru.trukhmanov.exception.ValidationException;
 
@@ -53,5 +54,14 @@ public final class CurrencyValidator{
             throw new ValidationException("Sign length cannot be less than 1 and more than %d"
                     .formatted(SIGN_MAX_LENGTH));
         }
+    }
+
+    public static void validateCreateCurrencyRequestDto(CreateCurrencyRequestDto request){
+        if(request.name() == null || request.name().isBlank())
+            throw new ValidationException("%s form field is missing".formatted("name"));
+        if(request.code() == null || request.code().isBlank())
+            throw new ValidationException("%s form field is missing".formatted("code"));
+        if(request.sign() == null || request.sign().isBlank())
+            throw new ValidationException("%s form field is missing".formatted("sign"));
     }
 }

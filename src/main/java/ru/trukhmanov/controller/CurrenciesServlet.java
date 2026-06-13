@@ -42,9 +42,9 @@ public class CurrenciesServlet extends HttpServlet{
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException{
         var out = resp.getWriter();
 
-        String name = req.getParameter("name").trim();
-        String code = req.getParameter("code").trim().toUpperCase();
-        String sign = req.getParameter("sign").trim();
+        String name = req.getParameter("name");
+        String code = req.getParameter("code");
+        String sign = req.getParameter("sign");
         var request = new CreateCurrencyRequestDto(code, name, sign);
 
         CurrencyDto result = CurrencyMapper.INSTANCE.toCurrencyDto(currenciesService.createCurrency(request));

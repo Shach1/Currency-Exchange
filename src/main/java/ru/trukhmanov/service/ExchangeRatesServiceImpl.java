@@ -28,9 +28,7 @@ public class ExchangeRatesServiceImpl implements ExchangeRatesService{
 
     @Override
     public ExchangeRate getExchangeRateByCodePair(String codePair){
-        if (codePair.length() != CurrenciesService.CODE_LENGTH * 2){
-            throw new ValidationException("Invalid request format");
-        }
+        ExchangeRateValidator.validateCodePair(codePair);
         String baseCurrencyCode = codePair.substring(0, CurrenciesService.CODE_LENGTH);
         String targetCurrencyCode = codePair.substring(CurrenciesService.CODE_LENGTH, CurrenciesService.CODE_LENGTH * 2);
 
@@ -76,12 +74,13 @@ public class ExchangeRatesServiceImpl implements ExchangeRatesService{
 
     @Override
     public ExchangeRate updateExchangeRate(UpdateExchangeRateRequestDto request){
+        ExchangeRateValidator.validateUpdateExchangeRateRequestDto(request);
         ExchangeRate exchangeRate = getExchangeRateByCodePair(request.codePair());
         ExchangeRate updated = new ExchangeRate(
                 exchangeRate.id(),
                 exchangeRate.baseCurrency(),
                 exchangeRate.targetCurrency(),
-                getNormalizedRate(Parser.parseBigDecimal(request.rate())));
+                getNormalizedRate(Parser.parseBigDecimal(request.rate().trim())));
         ExchangeRateValidator.validateRate(updated.rate());
         updated = ratesDao.updateRate(updated).orElseThrow(() -> new RuntimeException("Update failed. Unsuspected error"));
         return updated;

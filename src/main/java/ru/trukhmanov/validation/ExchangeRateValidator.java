@@ -1,8 +1,10 @@
 package ru.trukhmanov.validation;
 
 import ru.trukhmanov.dto.request.CreateExchangeRateRequestDto;
+import ru.trukhmanov.dto.request.UpdateExchangeRateRequestDto;
 import ru.trukhmanov.entity.ExchangeRate;
 import ru.trukhmanov.exception.ValidationException;
+import ru.trukhmanov.service.CurrenciesService;
 
 import java.math.BigDecimal;
 
@@ -32,6 +34,19 @@ public final class ExchangeRateValidator{
         }
         if (request.rate() == null || request.rate().isBlank()){
             throw new ValidationException("%s form field is missing".formatted("rate"));
+        }
+    }
+
+    public static void validateUpdateExchangeRateRequestDto(UpdateExchangeRateRequestDto request){
+        validateCodePair(request.codePair());
+        if (request.rate() == null || request.rate().isBlank()){
+            throw new ValidationException("%s form field is missing".formatted("rate"));
+        }
+    }
+
+    public static void validateCodePair(String codePair){
+        if (codePair.length() != CurrenciesService.CODE_LENGTH * 2){
+            throw new ValidationException("Invalid request format");
         }
     }
 }
