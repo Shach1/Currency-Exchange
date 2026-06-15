@@ -64,7 +64,7 @@ public class ExchangeRatesDaoImpl implements ExchangeRatesDao{
             statement.setInt(2, targetCurrencyId);
             ResultSet resultSet = statement.executeQuery();
             var result = mapResultSetToList(resultSet);
-            if(result.isEmpty()){
+            if (result.isEmpty()){
                 return Optional.empty();
             }
             return Optional.of(result.getFirst());
@@ -82,7 +82,7 @@ public class ExchangeRatesDaoImpl implements ExchangeRatesDao{
             statement.executeUpdate();
             return findByCurrenciesId(exchangeRate.baseCurrency().id(), exchangeRate.targetCurrency().id());
         } catch (SQLException e){
-            if(e.getErrorCode() == SQLiteErrorCode.SQLITE_CONSTRAINT.code){
+            if (e.getErrorCode() == SQLiteErrorCode.SQLITE_CONSTRAINT.code){
                 throw new EntityAlreadyExistException("A currency pair with this code already exists");
             }
             throw new DatabaseException("Insert failed");

@@ -61,7 +61,7 @@ public class CurrenciesDaoImpl implements CurrenciesDao{
             ResultSet result = statement.executeQuery();
             return mapResultSetToOptional(result);
         } catch (SQLException e){
-            if(e.getErrorCode() == SQLiteErrorCode.SQLITE_CONSTRAINT.code){
+            if (e.getErrorCode() == SQLiteErrorCode.SQLITE_CONSTRAINT.code){
                 throw new EntityAlreadyExistException("A currency with this code already exists");
             }
             throw new DatabaseException("Insert failed");
@@ -70,7 +70,7 @@ public class CurrenciesDaoImpl implements CurrenciesDao{
 
     private Optional<Currency> mapResultSetToOptional(ResultSet resultSet){
         try{
-            if(resultSet.next()){
+            if (resultSet.next()){
                 return Optional.of(new Currency(
                         resultSet.getInt("id"),
                         resultSet.getString("code"),
