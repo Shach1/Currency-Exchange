@@ -3,14 +3,27 @@
 
 Фронтенд взят [отсюда](https://github.com/zhukovsd/currency-exchange-frontend).
 
----
-Для самостоятельного запуска проекта необходимо наличие [JDK 21](https://www.oracle.com/asean/java/technologies/downloads/#java21) и и [Apache Tomcat 11](https://tomcat.apache.org/download-11.cgi)
+## Стек
+
+- **Java 21** — основной язык проекта.
+- **Gradle Kotlin DSL** — сборка проекта и управление зависимостями.
+- **Jakarta Servlet API / Jakarta EE Web API 11** — обработка HTTP-запросов через сервлеты.
+- **Apache Tomcat 11** — контейнер сервлетов для запуска приложения.
+- **SQLite** — файловая реляционная база данных.
+- **SQLite JDBC** — JDBC-драйвер для подключения к SQLite.
+- **HikariCP** — пул соединений с базой данных.
+- **Gson** — сериализация Java-объектов в JSON и десериализация JSON в Java-объекты.
+- **MapStruct** — генерация мапперов между entity и DTO.
+- **Bootstrap / jQuery** — готовая frontend-часть приложения.
+
+
 ## Этапы запуска
+Для самостоятельного запуска проекта необходимо наличие [JDK 21](https://www.oracle.com/asean/java/technologies/downloads/#java21) и [Apache Tomcat 11](https://tomcat.apache.org/download-11.cgi)
 1) Собрать проект
 ```shell
 ./gradlew clean war
 ```
-После успешной сборки в проекте появится артефакт .`/build/libs/ROOT.war`
+После успешной сборки в проекте появится артефакт `./build/libs/ROOT.war`
 
 2) Удалить все из папки `{tomcat_home}/webapps` и переместить туда собранный артефакт
 
